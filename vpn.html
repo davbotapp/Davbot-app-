@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>VPN RDC</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  body {
+    margin: 0;
+         background: linear-gradient(#0f2222, #021010);
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  #vpn-indicator {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: green;
+    color: white;
+    padding: 10px 0;
+    font-weight: bold;
+    z-index: 999;
+  }
+  h1 {
+    color: #00ff00;
+  }
+  .vpn-box {
+    background: #1b211b;
+    border-radius: 12px;
+    padding: 30px 20px;
+    margin-top: 60px;
+  }
+   .circle {
+      width: 130px;
+      height: 130px;
+      background: #a00;
+      border-radius: 50%;
+      margin: 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: bold;
+      transition: 0.4s ease;
+      
+     
+    border-radius: 80px;
+  
+    
+    position: relative;
+    }
+    button {
+      background: #0f0;
+      color: #000;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 30px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+  utton {
+   
+   
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 20px;
+    min-width: 140px;
+    position: relative;
+  }
+  button:hover {
+    background: #00cc00;
+  }
+  select {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+  }
+  #timer {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #ccc;
+  }
+  /* Spinner */
+  .spinner {
+border: 3px solid rgba(255,255,255,0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  @keyframes spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div id="vpn-indicator">VPN ACTIVÉ</div
+
+<h1>DAVBOT VPN RDC</h>
+<div class="vpn-box">
+  
+  
+  
+  <div id="timer"></div>
+  <div class="circle" id="btn">OFF</div>
+<div class="vpn-box">
+  <label for="pays"><h3>Choisir un pays :</h3></label>
+  <select id="pays">
+      <option value="Davbot"> 🌎 Davbot App 🌎</option>
+    <option value="rdc">🇨🇩 RDC aîrtel 1</option>
+    
+        <option>🇨🇩 RDC aîrtel illimité</option>
+        
+      <option>🇨🇩 RDC Vodacom illimité</option>
+      <option>🇨🇩 RDC orange 100 MB</option>
+      <option>🇨🇩 RDC orange illimité</option>
+      <option>Allemagne 🇩🇪</option>
+      <option>Brésil 🇧🇷</option>
+      <option>Davbot service 🟢</option>
+    
+    <option value="fr">🇫🇷 France</option>
+    <option value="us">🇺🇸 USA</option>
+    <option value="de">🇩🇪 Allemagne</option>
+    
+        <option>Afrique centrale ▶️</option>
+     
+      <option>Canada 🇨🇦</option>
+      <option>Japon 🇯🇵</option>
+     
+      <option>Brésil 🇧🇷</option>
+    </select>
+  </select>
+<div class="info">
+    <button id="btn" onclick="toggleVPN()">Connecter</button>
+      <p>📡 IP : <span id="ip">130.45.7.657/</span></p>
+      <p>🔐 Statut : <span id="indicator.style.display">🟢</span></p>
+      
+    </div>
+  </div>
+ 
+  <br /><br />
+<script>
+  let connected = localStorage.getItem("vpn") === "on";
+  let startTime = localStorage.getItem("startTime");
+  const indicator = document.getElementById("vpn-indicator");
+  const btn = document.getElementById("btn");
+  const timer = document.getElementById("timer");
+
+  function updateUI() {
+    if (connected) {
+      indicator.style.display = "block";
+ btn.textContent = "connect";
+      btn.style.backgroundColor = "#00aa00";
+    } else {
+      indicator.style.display = "none";
+      btn.textContent = "déconnect";
+      btn.style.backgroundColor = "#a00";
+      timer.textContent = "";
+    }
+  }
+
+  function toggleVPN() {
+    if (!connected) {
+      // Show spinner and disable button
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Connexion...';
+
+      setTimeout(() => {
+        connected = true;
+        localStorage.setItem("vpn", "on");
+        startTime = Date.now();
+        localStorage.setItem("startTime", startTime);
+        btn.disabled = false;
+        updateUI();
+      }, 2000); // 2 sec faux chargement
+    } else {
+      connected = false;
+      localStorage.removeItem("vpn");
+      localStorage.removeItem("startTime");
+      updateUI();
+    }
+  }
+
+  function updateTimer() {
+    if (connected && startTime) {
+      const seconds = Math.floor((Date.now() - startTime) / 1000);
+      const mins = Math.floor(seconds / 60);
+      const hrs = Math.floor(mins / 60);
+      const display = `hrsh${mins % 60}m ${seconds % 60}s`;
+      timer.textContent = "Durée connectée : " + display;
+    }
+  }
+
+  updateUI();
+  setInterval(updateTimer, 1000);
+</script>
+
+</body>
+</html>
+
+
+
+
+

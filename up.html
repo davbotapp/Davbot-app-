@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hébergement URL</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      padding: 20px;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    input { width: 160px; }
+    .btn { background: #3498db; color: white; cursor: pointer; }
+    table {
+      width: 2%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border-bottom: 1px solid #444;
+      padding: 8px;
+      text-align: center;
+    }
+    .online { color: #2ecc71; }
+    .offline { color: #e74c3c; }
+    .circle {
+      width: 100px;
+      height: 90px;
+      border-radius: 50%;
+   background: gray;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h2>📡 Hébergement d’URL (local)</h2>
+  <div>
+    <input id="username" placeholder="Nom d'utilisateur" />
+    <input id="displayname" placeholder="Nom d'affichage" />
+    <input id="url" placeholder="URL" />
+    <input id="port" type="number" placeholder="Port (≥204)" />
+    <button class="btn" onclick="addUrl()">Ajouter</button>
+  </div>
+
+  <div class="circle" id="statusCircle">0%</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Utilisateur</th>
+        <th>Nom</th>
+        <th>URL</th>
+        <th>Port</th>
+        <th>Statut</th>
+        <th>Durée</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="urlTable"></tbody>
+  </table>
+
+  <script>
+    let urls = JSON.parse(localStorage.getItem("urls") || "[]");
+
+    function save() {
+      localStorage.setItem("urls", JSON.stringify(urls));
+    }
+
+    function addUrl() {
+      const username = document.getElementById("username").value.trim();
+      const displayname = document.getElementById("displayname").value.trim();
+      const url = document.getElementById("url").value.trim();
+const port = parseInt(document.getElementById("port").value.trim());
+
+      if (!username || !displayname || !url || isNaN(port) || port < 204) return alert("Veuillez remplir correctement");
+
+      urls.push({ username, displayname, url, port, status: "unknown", start: null, duration: 0 });
+      save();
+      render();
+    }
+
+    function deleteUrl(index) {
+      urls.splice(index, 1);
+      save();
+      render();
+    }
+
+    function simulatePing() {
+      urls.forEach(u => {
+        const isOnline = Math.random() > 0.2; // 80% online chance
+        if (isOnline) {
+          if (!u.start) u.start = Date.now();
+          u.status = "online";
+          u.duration = Math.floor((Date.now() - u.start) / 1000);
+        } else {
+          u.status = "offline";
+          u.start = null;
+          u.duration = 0;
+        }
+      });
+      save();
+      render();
+    }
+
+    function render() {
+      const tbody = document.getElementById("urlTable");
+      tbody.innerHTML = "";
+
+      let onlineCount = 0;
+      urls.forEach((u, i) => {
+        if (u.status === "online") onlineCount++;
+        const row = `<tr>
+          <td>${u.username}</td>
+          <td>${u.displayname}</td>
+          <td>${u.url}</td>
+          <td>${u.port}</td>
+<td>${u.status}</td>
+          <td>${u.durations}</td>
+          <td><button onclick="deleteUrl(${i})">🗑️</button></td>
+          
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+
+      const total = urls.length;
+      const percent = total ? Math.round((onlineCount / total) * 100) : 0;
+      const circle = document.getElementById("statusCircle");
+      circle.textContent = `${percent}%`;
+      circle.style.background = total === 0 ? "gray" : percent >= 50 ? "#2ecc71" : "#e74c3c";
+    }
+
+    setInterval(simulatePing, 10000); // pour test — changer à 3600000 pour 1h
+    render();
+  </script>
+</body>
+</html>

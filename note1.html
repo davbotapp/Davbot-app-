@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bloc-notes - Davbot</title>
+  <style>
+    body {
+      background: #121212;
+      color: #e0e0e0;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    textarea {
+      width: 90%;
+      height: 250px;
+      padding: 15px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #444;
+      background: #1e1e1e;
+      color: #fff;
+      resize: none;
+    }
+    input, select {
+      padding: 10px;
+      margin: 10px 5px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #444;
+      background: #1e1e1e;
+      color: #fff;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background: #facc15;
+      color: #000;
+      cursor: pointer;
+    }
+    button:hover {
+background: #eab308;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📝 Bloc-notes Davbot</h1>
+
+  <input type="text" id="fileName" placeholder="Nom du fichier (ex: devoir)" />
+  <br>
+  <textarea id="noteArea" placeholder="Écris ta note ici..."></textarea>
+  <br>
+  <button onclick="saveNote()">Enregistrer</button>
+  <button onclick="deleteNote()">Supprimer</button>
+  <button onclick="downloadPDF()">Télécharger PDF</button>
+  <br><br>
+  <select id="historySelect" onchange="loadNote()">
+    <option value="">📚 Voir l'historique</option>
+  </select>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const noteArea = document.getElementById("noteArea");
+    const fileNameInput = document.getElementById("fileName");
+    const historySelect = document.getElementById("historySelect");
+
+    function updateHistory() {
+      historySelect.innerHTML = '<option value="">📚 Voir l\'historique</option>';
+      for (let key in localStorage) {
+        if (key.startsWith("note_")) {
+          const name = key.replace("note_", "");
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          historySelect.appendChild(option);
+        }
+      }
+    }
+function saveNote() {
+      const name = fileNameInput.value.trim();
+      const content = noteArea.value;
+      if (!name || !content) {
+        alert("Remplis le nom du fichier et la note !");
+        return;
+      }
+      localStorage.setItem("note_" + name, content);
+      alert("✅ Note enregistrée !");
+      updateHistory();
+    }
+
+    function deleteNote() {
+      const name = fileNameInput.value.trim();
+      if (!name) {
+        alert("Entre le nom du fichier à supprimer.");
+        return;
+      }
+      localStorage.removeItem("note_" + name);
+      noteArea.value = "";
+      fileNameInput.value = "";
+      alert("🗑️ Note supprimée !");
+      updateHistory();
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const name = fileNameInput.value.trim();
+      const content = noteArea.value;
+      if (!name || !content) {
+        alert("Remplis le nom du fichier et la note !");
+        return;
+      }
+      const pdf = new jsPDF();
+      pdf.text(content, 10, 10);
+      pdf.save(`${name}-Davbot.pdf`);
+    }
+
+    function loadNote() {
+      const name = historySelect.value;
+      if (!name) return;
+      const content = localStorage.getItem("note_" + name);
+      fileNameInput.value = name;
+      noteArea.value = content;
+    }
+// Initialiser l'historique au chargement
+    updateHistory();
+  </script>
+
+</body>
+</html>

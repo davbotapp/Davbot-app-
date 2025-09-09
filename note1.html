@@ -1,134 +1,127 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bloc-notes - Davbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bloc Note Davbot</title>
   <style>
     body {
-      background: #121212;
-      color: #e0e0e0;
+      background-color: #0f1a1a;
+      color: #fff;
       font-family: Arial, sans-serif;
       padding: 20px;
       text-align: center;
     }
     textarea {
       width: 90%;
-      height: 250px;
-      padding: 15px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #444;
-      background: #1e1e1e;
-      color: #fff;
-      resize: none;
-    }
-    input, select {
+      height: 200px;
       padding: 10px;
-      margin: 10px 5px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #444;
-      background: #1e1e1e;
-      color: #fff;
-    }
-    button {
-      padding: 10px 20px;
-      margin: 10px 5px;
-      font-size: 16px;
       border: none;
       border-radius: 5px;
-      background: #facc15;
-      color: #000;
+      background: #1e2d2d;
+      color: #fff;
+      font-size: 16px;
+    }
+    button {
+      margin: 8px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background: #00c896;
+      color: white;
+      font-weight: bold;
       cursor: pointer;
     }
-    button:hover {
-background: #eab308;
+    #history {
+ margin-top: 30px;
+      background: #1e2d2d;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .note-item {
+      cursor: pointer;
+      color: #00c896;
+      margin: 5px 0;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-
-  <h1>📝 Bloc-notes Davbot</h1>
-
-  <input type="text" id="fileName" placeholder="Nom du fichier (ex: devoir)" />
-  <br>
-  <textarea id="noteArea" placeholder="Écris ta note ici..."></textarea>
-  <br>
+  <h2>📝 Bloc Note Davbot</h2>
+  <textarea id="note" placeholder="Écris ta note ici..."></textarea><br>
   <button onclick="saveNote()">Enregistrer</button>
   <button onclick="deleteNote()">Supprimer</button>
-  <button onclick="downloadPDF()">Télécharger PDF</button>
-  <br><br>
-  <select id="historySelect" onchange="loadNote()">
-    <option value="">📚 Voir l'historique</option>
-  </select>
+  <button onclick="exportPDF()">Exporter en PDF</button>
+  <button onclick="exportTXT()">Exporter en .TXT</button>
+  <button onclick="window.print()">🖨️ Imprimer</button>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <div id="history">
+    <h3>📁 Notes enregistrées</h3>
+    <div id="noteList"></div>
+  </div>
+
   <script>
-    const noteArea = document.getElementById("noteArea");
-    const fileNameInput = document.getElementById("fileName");
-    const historySelect = document.getElementById("historySelect");
+    const noteField = document.getElementById('note');
+    const noteList = document.getElementById('noteList');
 
-    function updateHistory() {
-      historySelect.innerHTML = '<option value="">📚 Voir l\'historique</option>';
-      for (let key in localStorage) {
-        if (key.startsWith("note_")) {
-          const name = key.replace("note_", "");
-          const option = document.createElement("option");
-          option.value = name;
-          option.textContent = name;
-          historySelect.appendChild(option);
-        }
-      }
-    }
-function saveNote() {
-      const name = fileNameInput.value.trim();
-      const content = noteArea.value;
-      if (!name || !content) {
-        alert("Remplis le nom du fichier et la note !");
-        return;
-      }
-      localStorage.setItem("note_" + name, content);
-      alert("✅ Note enregistrée !");
+    function saveNote() {
+      const name = prompt("Nom de la note ?");
+      if (!name) return;
+      localStorage.setItem("davbot-note-" + name, noteField.value);
       updateHistory();
+      alert("Note enregistrée sous '" + name + "'");
     }
 
     function deleteNote() {
-      const name = fileNameInput.value.trim();
-      if (!name) {
-        alert("Entre le nom du fichier à supprimer.");
-        return;
-      }
-      localStorage.removeItem("note_" + name);
-      noteArea.value = "";
-      fileNameInput.value = "";
-      alert("🗑️ Note supprimée !");
-      updateHistory();
-    }
-
-    async function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const name = fileNameInput.value.trim();
-      const content = noteArea.value;
-      if (!name || !content) {
-        alert("Remplis le nom du fichier et la note !");
-        return;
-      }
-      const pdf = new jsPDF();
-      pdf.text(content, 10, 10);
-      pdf.save(`${name}-Davbot.pdf`);
-    }
-
-    function loadNote() {
-      const name = historySelect.value;
+      const name = prompt("Nom de la note à supprimer ?");
       if (!name) return;
-      const content = localStorage.getItem("note_" + name);
-      fileNameInput.value = name;
-      noteArea.value = content;
+      localStorage.removeItem("davbot-note-" + name);
+      updateHistory();
+alert("Note supprimée !");
     }
-// Initialiser l'historique au chargement
+
+    function exportPDF() {
+      const name = prompt("Nom du fichier sans extension ?");
+      if (!name) return;
+      const text = noteField.value;
+      const blob = new Blob([text], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = name + "-Davbot.pdf";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function exportTXT() {
+      const name = prompt("Nom du fichier sans extension ?");
+      if (!name) return;
+      const text = noteField.value;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = name + "-Davbot.txt";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function updateHistory() {
+      noteList.innerHTML = "";
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith("davbot-note-")) {
+          const name = key.replace("davbot-note-", "");
+          const div = document.createElement("div");
+          div.textContent = name + "-Davbot";
+          div.className = "note-item";
+          div.onclick = () => {
+noteField.value = localStorage.getItem(key);
+          };
+          noteList.appendChild(div);
+        }
+      });
+    }
+
     updateHistory();
   </script>
-
 </body>
 </html>

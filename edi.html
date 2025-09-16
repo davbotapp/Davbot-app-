@@ -1,89 +1,136 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Générateur de Site Web</title>
+  <title>DavEditor One</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #160;
-      padding: 10px;
-    }
-
-    h1 {
-      text-align: center;
+      margin: 0;
+      font-family: monospace;
+      background: #121212;
       color: #fff;
-    }
-
-    .editor-container {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      height: 100vh;
+    }
+
+    header {
+      background: #d32f2f;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
     }
 
     textarea {
+      flex: 1;
       width: 100%;
-      height: 100px;
-      padding: 10px;
-      font-family: monospace;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    #run-button {
-      background-color: #00bfff;
-      color: white;
+      background: #1e1e1e;
+      color: #fff;
       border: none;
-      padding: 21px 29px;
-      font-size: 18px;
-      cursor: pointer;
-      margin-top: 15px;
-      border-radius: 8px;
+      padding: 10px;
+      font-size: 14px;
+      resize: none;
     }
 
-    #preview {
+    #controls {
+      display: flex;
+      justify-content: space-around;
+      background: #222;
+      padding: 10px;
+    }
+
+    button {
+      background: #f44336;
+      border: none;
+      padding: 10px 20px;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    iframe {
+      flex: 1;
       width: 100%;
-      height: 500px;
-      border: 1px solid #ccc;
-      margin-top: 10px;
-      background-color: white;
+      border: none;
+    }
+
+    #history {
+      max-height: 150px;
+      overflow-y: auto;
+      background: #2a2a2a;
+      padding: 10px;
+    }
+
+    .project-item {
+      background: #333;
+      margin-bottom: 5px;
+      padding: 5px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .project-item:hover {
+      background: #444;
     }
   </style>
 </head>
 <body>
-  <h1>Générateur de Site Web Professionnel</h1>
-  
-  <div class="editor-container">
-      <label for="html-editor">HTML</label>
-    <textarea id="html-editor" placeholder="Écrivez votre code HTML ici..."></textarea>
-    
-    <label for="css-editor">CSS</label>
-    <textarea id="css-editor" placeholder="Écrivez votre code CSS ici..."></textarea>
-    
-    <label for="js-editor">JavaScript</label>
-    <textarea id="js-editor" placeholder="Écrivez votre code JavaScript ici..."></textarea>
-    
-    
+
+  <header>DavEditor</header>
+
+  <textarea id="codeArea" placeholder="Écris ton code HTML/CSS/JS ici..."></textarea>
+
+  <div id="controls">
+    <button onclick="runCode()">▶️ Exécuter</button>
+    <button onclick="saveProject()">💾 Enregistrer</button>
   </div>
-  
-  <button id="run-button">Go</button>
-  
-  <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+
+  <iframe id="output" height="200"></iframe>
+
+  <div id="history">
+    <strong>📁 Projets enregistrés :</strong>
+    <div id="projectList"></div>
+  </div>
 
   <script>
-    document.getElementById('run-button').addEventListener('click', () => {
-      const htmlCode = document.getElementById('html-editor').value;
-      const cssCode = `<style>document.getElementById('css-editor').value</style>`;
-      const jsCode = `<script>{document.getElementById('js-editor').value}<\/script>`;
-      
-      const previewFrame = document.getElementById('preview');
-      const previewDocument = previewFrame.contentDocument || previewFrame.contentWindow.document;
-      
-      previewDocument.open();
-      previewDocument.write(htmlCode + cssCode + jsCode);
-      previewDocument.close();
-    });
+    function runCode() {
+      const code = document.getElementById('codeArea').value;
+      document.getElementById('output').srcdoc = code;
+    }
+
+    function saveProject() {
+      const name = prompt("Nom du projet ?");
+      if (!name) return;
+
+      const code = document.getElementById('codeArea').value;
+      const existing = JSON.parse(localStorage.getItem('dav_projects') || '{}');
+      existing[name] = code;
+      localStorage.setItem('dav_projects', JSON.stringify(existing));
+      updateProjectList();
+    }
+
+    function updateProjectList() {
+      const list = document.getElementById('projectList');
+      list.innerHTML = "";
+      const projects = JSON.parse(localStorage.getItem('dav_projects') || '{}');
+
+      for (const name in projects) {
+        const item = document.createElement('div');
+        item.className = 'project-item';
+        item.textContent = name;
+        item.onclick = () => {
+          document.getElementById('codeArea').value = projects[name];
+          runCode();
+        };
+        list.appendChild(item);
+      }
+    }
+
+    updateProjectList();
   </script>
 </body>
 </html>

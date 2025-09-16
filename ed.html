@@ -1,225 +1,136 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="google-adsense-account" content="ca-pub-2369850404577164">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>David</title>
-    <link rel="stylesheet" href="style.css"> <!-- Link to external CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/3.0.1/iconfont/material-icons.css">
-    <link rel="icon" type="img" href="reneim.jpeg"/> 
-    <style>
-        body {
-            background-color: #121212; /* Couleur de fond sombre */
-            color: #ffffff; /* Couleur du texte */
-            font-family: Arial, sans-serif;
-        }
+  <meta charset="UTF-8">
+  <title>DavEditor One</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      font-family: monospace;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
 
-        /* Styles pour le menu de navigation */
-        nav {
-            position: absolute;
-            top: 60px; /* Ajustez selon la hauteur de votre en-tête */
-            left: 20px;
-            background-color: #4b4b80; /* Couleur de fond du menu */
-            border-radius: 10px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 15px;
-            width: 200px;
-            opacity: 0; /* Masqué par défaut */
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            visibility: hidden; /* Masqué par défaut */
-        }
+    header {
+      background: #d32f2f;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
 
-        nav.visible {
-            opacity: 1; /* Visible */
-            visibility: visible; /* Visible */
-        }
+    textarea {
+      flex: 1;
+      width: 100%;
+      background: #1e1e1e;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      font-size: 14px;
+      resize: none;
+    }
 
-        nav.hidden {
-            opacity: 0; /* Masqué */
-            visibility: hidden; /* Masqué */
-        }
+    #controls {
+      display: flex;
+      justify-content: space-around;
+      background: #222;
+      padding: 10px;
+    }
 
-        nav ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            width: 100%;
-        }
+    button {
+      background: #f44336;
+      border: none;
+      padding: 10px 20px;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
 
-        nav li {
-            margin: 10px 0;
-        }
+    iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+    }
 
-        nav li a {
-            text-decoration: none;
-            color: #ffffff;
-            padding: 10px;
-            display: block;
-            transition: background-color 0.3s;
-        }
+    #history {
+      max-height: 150px;
+      overflow-y: auto;
+      background: #2a2a2a;
+      padding: 10px;
+    }
 
-        nav li a:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
+    .project-item {
+      background: #333;
+      margin-bottom: 5px;
+      padding: 5px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
 
-        .chatbox {
-            border: 1px solid #444; /* Bordure plus sombre */
-            padding: 10px;
-            height: 300px;
-            overflow-y: auto;
-            margin-top: 20px;
-            background-color: #1e1e1e; /* Couleur de fond de la zone de chat */
-        }
-
-        .input-area {
-            display: flex;
-            margin-top: 10px;
-        }
-
-        .input-area input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #444; /* Bordure plus sombre */
-            background-color: #333; /* Couleur de fond de l'input */
-            color: #ffffff; /* Couleur du texte de l'input */
-        }
-
-        .input-area button {
-            padding: 10px;
-            background-color: #4b4b80; /* Couleur de fond du bouton */
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .user-message {
-            text-align: right;
-            color: #00bfff; /* Couleur des messages de l'utilisateur */
-        }
-
-        .assistant-message {
-            text-align: left;
-            color: #90ee90; /* Couleur des messages du bot */
-        }
-
-        .typing-effect {
-            border-right: 2px solid #ffffff; /* Curseur de saisie */
-            animation: blink 0.7s step-end infinite; /* Animation de clignotement */
-        }
-
-        @keyframes blink {
-            50% {
-                border-color: transparent; /* Faire clignoter le curseur */
-            }
-        }
-    </style>
+    .project-item:hover {
+      background: #444;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Header with Navigation Menu -->
-    <div class="header">
-        <button class="menu-button">☰</button>
-        <h5 align="right">Davbot</h5>
-    </div>
+  <header>DavEditor</header>
 
-    <!-- Chat Container -->
-    <div class="container">
-        <div id="chatbox" class="chatbox">
-            <!-- Bot's initial greeting -->
-            <div class="assistant-message">Bienvenue dans la première version de davbot pdf😈!</div>
-        </div>
-        <div class="input-area">
-            <input id="chatInput" type="text" placeholder="Tapez votre message">
-            <button id="sendButton">
-                <span class="material-icons">send</span>
-            </button>
-        </div>
-    </div>
+  <textarea id="codeArea" placeholder="Écris ton code HTML/CSS/JS ici..."></textarea>
 
-    <script src="main.js"></script> <!-- Lien vers votre fichier main.js -->
-        <script>
-        // Code pour le menu de navigation
-        const menuButton = document.querySelector(".menu-button");
-        const navigationMenu = document.createElement("nav");
+  <div id="controls">
+    <button onclick="runCode()">▶️ Exécuter</button>
+    <button onclick="saveProject()">💾 Enregistrer</button>
+  </div>
 
-        // Ajouter le menu de navigation dynamiquement
-        navigationMenu.classList.add("hidden"); // Masqué par défaut
-        navigationMenu.innerHTML = `
-            <ul>
-                <li><a href="index.html">Accueil</a></li>
-                <li><a href="image.html">Image Generation</a></li>
-                <li><a href="feedback.html">Feedback</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li><a href="about.html">À propos</a></li>
-            </ul>
-        `;
-        document.body.appendChild(navigationMenu);
+  <iframe id="output" height="200"></iframe>
 
-        menuButton.addEventListener("click", () => {
-            navigationMenu.classList.toggle("hidden");
-            navigationMenu.classList.toggle("visible");
-        });
+  <div id="history">
+    <strong>📁 Projets enregistrés :</strong>
+    <div id="projectList"></div>
+  </div>
 
-        // Fonction pour afficher les messages
-        async function displayMessage(message, isUser ) {
-            const msgElem = document.createElement("div");
-            msgElem.className = `chat-message ${isUser  ? "user-message" : "assistant-message"}`;
+  <script>
+    function runCode() {
+      const code = document.getElementById('codeArea').value;
+      document.getElementById('output').srcdoc = code;
+    }
 
-            if (isUser ) {
-                msgElem.textContent = message;
-            } else {
-                // Ajouter un effet de saisie pour les messages du bot
-                simulateTypingEffect(msgElem, message);
-            }
+    function saveProject() {
+      const name = prompt("Nom du projet ?");
+      if (!name) return;
 
-            chatbox.appendChild(msgElem);
-            chatbox.scrollTop = chatbox.scrollHeight; // Faire défiler vers le bas
-        }
+      const code = document.getElementById('codeArea').value;
+      const existing = JSON.parse(localStorage.getItem('dav_projects') || '{}');
+      existing[name] = code;
+      localStorage.setItem('dav_projects', JSON.stringify(existing));
+      updateProjectList();
+    }
 
-        // Fonction pour simuler un effet de saisie
-        function simulateTypingEffect(container, message) {
-            container.innerHTML = ''; // Effacer le conteneur
-            const typingEffect = document.createElement('span');
-            typingEffect.className = 'typing-effect';
-            container.appendChild(typingEffect);
+    function updateProjectList() {
+      const list = document.getElementById('projectList');
+      list.innerHTML = "";
+      const projects = JSON.parse(localStorage.getItem('dav_projects') || '{}');
 
-            let i = 0;
-            function typeCharacter() {
-                if (i < message.length) {
-                    typingEffect.textContent += message.charAt(i);
-                    i++;
-                    setTimeout(typeCharacter, 15); // Ajuster la vitesse ici (15ms par caractère)
-                } else {
-                    typingEffect.style.border = 'none'; // Retirer le curseur après la saisie
-                }
-            }
+      for (const name in projects) {
+        const item = document.createElement('div');
+        item.className = 'project-item';
+        item.textContent = name;
+        item.onclick = () => {
+          document.getElementById('codeArea').value = projects[name];
+          runCode();
+        };
+        list.appendChild(item);
+      }
+    }
 
-            typeCharacter();
-        }
-
-        // Écouteur d'événements pour le bouton d'envoi
-        sendButton.addEventListener("click", async () => {
-            const userMessage = chatInput.value.trim();
-            if (!userMessage) return;
-
-            displayMessage(userMessage, true);
-            chatInput.value = "";
-
-            await fetchResponse(userMessage);
-        });
-
-        // Écouteur d'événements pour la touche "Entrée"
-        chatInput.addEventListener("keypress", (event) => {
-            if (event.key === "Enter") {
-                sendButton.click();
-            }
-        });
-    </script>
+    updateProjectList();
+  </script>
 </body>
 </html>

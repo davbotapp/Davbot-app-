@@ -4,115 +4,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Davbot Service</title>
+  <title>Davbot App</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: url('https://i.imgur.com/ItbhQFq.jpeg') no-repeat center center fixed;
-      background-size: cover;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #0f0f0f, #1a1a2e);
       color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
       text-align: center;
     }
 
-    .overlay {
-      background: rgba(0, 0, 0, 0.7);
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
+    .logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-image: url('https://i.imgur.com/L2SIlyw.jpeg');
+      background-size: cover;
+      background-position: center;
+      margin-bottom: 20px;
+      box-shadow: 0 0 15px rgba(255,255,255,0.2);
     }
 
     h1 {
-      color: #00bfff;
-      font-size: 2em;
-      margin-bottom: 10px;
+      font-size: 28px;
+      margin-bottom: 40px;
     }
 
-    h2 {
-      font-size: 2.5em;
-      margin: 10px 0;
+    .cursor {display: inline-block;
+      animation: blink 0.7s steps(2, start) infinite;
     }
 
-    p {
-      max-width: 90%;
-      font-size: 1.1em;
-      margin-bottom: 30px;
+    @keyframes blink {
+      to { visibility: hidden; }
     }
 
-    .btns {
+    .buttons {
       display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      justify-content: center;
+      gap: 20px;
     }
 
-    .btn {
+    .buttons a {
+      background: #0077ff;
+      color: white;
       padding: 12px 24px;
-      border: 2px solid #00bfff;
-      color: #00bfff;
-  b border-radius: 8px;
       text-decoration: none;
-      font-size: 1em;
-      transition: 0.3s;
+      border-radius: 8px;
+      font-size: 16px;
+      box-shadow: 0 4px 15px rgba(0, 119, 255, 0.2);
+      transition: transform 0.2s ease;
     }
 
-    .btn:hover {
-      background: #00bfff;
-      color: #000;
+    .buttons a:hover {
+      transform: scale(1.05);
+      background: #005bd1;
+    }
+
+    @media (max-width: 500px) {
+      h1 { font-size: 22px; }
+      .buttons { flex-direction: column; }
     }
   </style>
 </head>
-
 <body>
-  <div class="overlay">
-      <h1 id="typingText"><br></h1>
-    
-   <p>.</p>
-    
-    <div class="btns">
-     <a href="gpt.html" class="btn">Lancer l'assistant</a>
-      <a href="fb.html" class="btn">Outils</a>
-    </div>
+
+  <div class="logo"></div>
+  <h1 id="title"> <span id="text"></span><span class="cursor">|</span> </h1>
+
+  <div class="buttons">
+    <a href="gpt.html">Lancer l’assistant</a>
+    <a href="fb.html">Outils</a>
   </div>
+
   <script>
-  const text = "Bienvenue chez \n Davbot App";
-  const element = document.getElementById("typingText");
-  let i = 0;
-
-  function typeWriter() {
-    if (i < text.length) {
-      const char = text.charAt(i);
-      if (char === "\n") {
-        element.innerHTML += "<br>";
-      } else {
-        element.innerHTML += char;
+    const text = "Bienvenue sur Davbot App <p>.</p>\n\n comment puis-je vous aidez aujourd'hui ?";
+    const el = document.getElementById("text");
+    let i = 0;
+    function typeLetter() {
+      if (i < text.length) {
+        el.textContent += text.charAt(i);
+        i++;
+        setTimeout(typeLetter, 60);
       }
-      i++;
-      setTimeout(typeWriter, 50); // Vitesse (ms)
     }
-  }
+    typeLetter();
+  </script>
 
-  // Lancer quand la page charge
-  window.onload = typeWriter;
-</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-

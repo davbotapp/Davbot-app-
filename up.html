@@ -2,148 +2,217 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hébergement URL</title>
+  <meta charset="UTF-8">
+  <title>Gestion Hébergement</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      background: #1a1a1a;
-      color: white;
-      padding: 20px;
+      background-color: #0d1117;
+      color: #c9d1d9;
     }
-    input, button {
-      padding: 8px;
-      margin: 5px;
+
+    header {
+      text-align: center;
+      padding: 20px;
+      background: #161b22;
+      color: #58a6ff;
+      font-size: 24px;
+      font-weight: bold;
+      border-bottom: 1px solid #30363d;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      background: #161b22;
+    }
+
+    nav button {
+      flex: 1;
+      padding: 12px;
+      background: #21262d;
+      color: #58a6ff;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      border-bottom: 2px solid transparent;
+    }
+
+    nav button.active {
+      border-bottom: 2px solid #58a6ff;
+      background: #0d1117;
+    }
+
+    .container {
+      padding: 20px;
+ }
+
+    input, button, label {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
       border-radius: 5px;
       border: none;
+      font-size: 16px;
     }
-    input { width: 160px; }
-    .btn { background: #3498db; color: white; cursor: pointer; }
-    table {
-      width: 2%;
-      margin-top: 20px;
-      border-collapse: collapse;
+
+    input {
+      background: #21262d;
+      color: #c9d1d9;
+      border: 2px solid #30363d;
     }
-    th, td {
-      border-bottom: 1px solid #444;
-      padding: 8px;
-      text-align: center;
+
+    input.valid {
+      border-color: #2ea043;
     }
-    .online { color: #2ecc71; }
-    .offline { color: #e74c3c; }
-    .circle {
-      width: 100px;
-      height: 90px;
-      border-radius: 50%;
-   background: gray;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 20px auto;
-      font-size: 18px;
+
+    input.invalid {
+      border-color: #f85149;
+    }
+
+    button {
+      background: #238636;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2ea043;
+    }
+
+    .site {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-left: 4px solid #58a6ff;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    .site p {
+      margin: 5px 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .danger {
+      background: #f85149;
+      border: none;
+      color: white;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .danger:hover {
+      background: #da3633;
     }
   </style>
 </head>
 <body>
-  <h2>📡 Hébergement d’URL (local)</h2>
-  <div>
-    <input id="username" placeholder="Nom d'utilisateur" />
-    <input id="displayname" placeholder="Nom d'affichage" />
-    <input id="url" placeholder="URL" />
-    <input id="port" type="number" placeholder="Port (≥204)" />
-    <button class="btn" onclick="addUrl()">Ajouter</button>
+  <header>Davbot Hébergement</header>
+
+  <nav>
+    <button class="active" onclick="showTab('add')">Ajouter</button>
+    <button onclick="showTab('list')">Liste</button>
+  </nav>
+
+  <div class="container">
+    <div id="add" class="tab">
+ <label for="name">Nom du site :</label>
+      <input type="text" id="name" placeholder="Ex: Mon Site">
+
+      <label for="url">URL :</label>
+      <input type="text" id="url" placeholder="https://exemple.com">
+
+      <label for="port">Port :</label>
+      <input type="number" id="port" placeholder="Ex: 8080">
+
+      <button onclick="addSite()">Ajouter</button>
+    </div>
+
+    <div id="list" class="tab hidden">
+      <div id="sitesContainer"></div>
+      <button class="danger" onclick="clearSites()">Vider le stockage</button>
+    </div>
   </div>
 
-  <div class="circle" id="statusCircle">0%</div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Utilisateur</th>
-        <th>Nom</th>
-        <th>URL</th>
-        <th>Port</th>
-        <th>Statut</th>
-        <th>Durée</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="urlTable"></tbody>
-  </table>
-
   <script>
-    let urls = JSON.parse(localStorage.getItem("urls") || "[]");
-
-    function save() {
-      localStorage.setItem("urls", JSON.stringify(urls));
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+      document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      if (tabId === 'list') loadSites();
     }
 
-    function addUrl() {
-      const username = document.getElementById("username").value.trim();
-      const displayname = document.getElementById("displayname").value.trim();
+    function isValidURL(url) {
+      try {
+        new URL(url);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function addSite() {
+      const name = document.getElementById("name").value.trim();
       const url = document.getElementById("url").value.trim();
-const port = parseInt(document.getElementById("port").value.trim());
+      const port = document.getElementById("port").value.trim();
+      const urlInput = document.getElementById("url");
 
-      if (!username || !displayname || !url || isNaN(port) || port < 204) return alert("Veuillez remplir correctement");
+      if (!isValidURL(url)) {
+        urlInput.classList.add("invalid");
+        urlInput.classList.remove("valid");
+        alert("URL invalide !");
+        return;
+      } else {
+        urlInput.classList.remove("invalid");
+        urlInput.classList.add("valid");
+      }
 
-      urls.push({ username, displayname, url, port, status: "unknown", start: null, duration: 0 });
-      save();
-      render();
+      const site = { name, url, port };
+      const existing = JSON.parse(localStorage.getItem("hebergements")) || [];
+      existing.push(site);
+      localStorage.setItem("hebergements", JSON.stringify(existing));
+
+      document.getElementById("name").value = "";
+      document.getElementById("url").value = "";
+      document.getElementById("port").value = "";
+      urlInput.classList.remove("valid");
+
+      alert("Hébergement enregistré !");
     }
 
-    function deleteUrl(index) {
-      urls.splice(index, 1);
-      save();
-      render();
-    }
+    function loadSites() {
+      const container = document.getElementById("sitesContainer");
+      container.innerHTML = "";
+      const sites = JSON.parse(localStorage.getItem("hebergements")) || [];
 
-    function simulatePing() {
-      urls.forEach(u => {
-        const isOnline = Math.random() > 0.2; // 80% online chance
-        if (isOnline) {
-          if (!u.start) u.start = Date.now();
-          u.status = "online";
-          u.duration = Math.floor((Date.now() - u.start) / 1000);
-        } else {
-          u.status = "offline";
-          u.start = null;
-          u.duration = 0;
-        }
+      if (sites.length === 0) {
+        container.innerHTML = "<p>Aucun hébergement enregistré.</p>";
+        return;
+      }
+
+      sites.forEach(site => {
+        const el = document.createElement("div");
+        el.className = "site";
+        el.innerHTML = `<p><strong>Nom :</strong> ${site.name}</p>
+          <p><strong>URL :</strong> <a href="{site.url}" target="_blank" style="color:#3fb950;">${site.url}</a></p>
+          <p><strong>Port :</strong>${site.port}</p>
+        `;
+        container.appendChild(el);
       });
-      save();
-      render();
     }
 
-    function render() {
-      const tbody = document.getElementById("urlTable");
-      tbody.innerHTML = "";
-
-      let onlineCount = 0;
-      urls.forEach((u, i) => {
-        if (u.status === "online") onlineCount++;
-        const row = `<tr>
-          <td>${u.username}</td>
-          <td>${u.displayname}</td>
-          <td>${u.url}</td>
-          <td>${u.port}</td>
-<td>${u.status}</td>
-          <td>${u.durations}</td>
-          <td><button onclick="deleteUrl(${i})">🗑️</button></td>
-          
-        </tr>`;
-        tbody.innerHTML += row;
-      });
-
-      const total = urls.length;
-      const percent = total ? Math.round((onlineCount / total) * 100) : 0;
-      const circle = document.getElementById("statusCircle");
-      circle.textContent = `${percent}%`;
-      circle.style.background = total === 0 ? "gray" : percent >= 50 ? "#2ecc71" : "#e74c3c";
+    function clearSites() {
+      localStorage.removeItem("hebergements");
+      loadSites();
     }
-
-    setInterval(simulatePing, 10000); // pour test — changer à 3600000 pour 1h
-    render();
   </script>
 </body>
 </html>

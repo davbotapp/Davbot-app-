@@ -2,101 +2,261 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Davbot App</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Davbot App</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to right, #0f0f0f, #1a1a2e);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      overflow: hidden;
-      text-align: center;
-    }
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  overflow: hidden;
+  background: #0f0f0f;
+}
 
-    .logo {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background-image: url('https://i.imgur.com/L2SIlyw.jpeg');
-      background-size: cover;
-      background-position: center;
-      margin-bottom: 20px;
-      box-shadow: 0 0 15px rgba(255,255,255,0.2);
-    }
+canvas { position: absolute; top:0; left:0; width:100%; height:100%; z-index:-1; }
 
-    h1 {
-      font-size: 28px;
-      margin-bottom: 40px;
-    }
+.logo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-image: url('https://i.imgur.com/L2SIlyw.jpeg');
+  background-size: cover;
+  background-position: center;
+  margin-bottom: 25px;
+  box-shadow: 0 0 20px rgba(0, 119, 255, 0.4);
+  border: 2px solid #0077ff;
+  animation: pulse 2s infinite;
+}
 
-    .cursor {display: inline-block;
-      animation: blink 0.7s steps(2, start) infinite;
-    }
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
 
-    @keyframes blink {
-      to { visibility: hidden; }
-    }
+h1 {
+  font-size: 28px;
+  margin-bottom: 40px;
+  line-height: 1.4;
+  z-index: 1;
+  position: relative;
+  background: linear-gradient(270deg, #00f0ff, #ff00ff, #00ff77, #ff7700);
+  background-size: 800% 800%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientAnim 10s ease infinite;
+  text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+}
 
-    .buttons {
-      display: flex;
-      gap: 20px;
-    }
+@keyframes gradientAnim {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
-    .buttons a {
-      background: #0077ff;
-      color: white;
-      padding: 12px 24px;
-      text-decoration: none;
-      border-radius: 8px;
-      font-size: 16px;
-      box-shadow: 0 4px 15px rgba(0, 119, 255, 0.2);
-      transition: transform 0.2s ease;
-    }
+.buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+  z-index: 1;
+  position: relative;
+}
 
-    .buttons a:hover {
-      transform: scale(1.05);
-      background: #005bd1;
-    }
+/* Boutons classiques */
+.buttons a {
+  padding: 14px 28px;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  background: linear-gradient(270deg, #00f0ff, #ff00ff, #00ff77, #ff7700);
+  background-size: 800% 800%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border: 2px solid;
+  border-image: linear-gradient(270deg, #00f0ff, #ff00ff, #00ff77, #ff7700) 1;
+  box-shadow: 0 0 10px #0077ff, 0 0 20px #ff00ff;
+  transition: all 0.2s ease;
+  animation: gradientAnim 10s ease infinite;
+}
 
-    @media (max-width: 500px) {
-      h1 { font-size: 22px; }
-      .buttons { flex-direction: column; }
-    }
-  </style>
+.buttons a:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #00f0ff, 0 0 30px #ff00ff, 0 0 40px #00ff77;
+}
+
+/* Bouton “Lancer l’assistant” ultra remarquable */
+.buttons a.launch {
+  order: -1;
+  padding: 16px 36px;
+  font-size: 18px;
+  border-radius: 12px;
+  background: linear-gradient(270deg, #00ffff, #00ff99, #00ccff, #00ffcc);
+  border: 2px solid #00ffff;
+  box-shadow: 0 0 15px #00ffff, 0 0 25px #00ff99, 0 0 35px #00ccff;
+  animation: pulseNeon 1.5s infinite alternate, gradientAnim 10s ease infinite;
+  position: relative;
+  z-index: 2;
+}
+
+/* Halo animé autour du bouton suivant le curseur */
+.launch::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 180px; height: 60px;
+  background: rgba(0,255,255,0.2);
+  border-radius: 20px;
+  filter: blur(20px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: all 0.15s ease;
+  z-index: -1;
+}
+
+.buttons a.launch:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 30px #00ffff, 0 0 40px #00ff99, 0 0 50px #00ccff;
+}
+
+@keyframes pulseNeon {
+  0% { box-shadow: 0 0 15px #00ffff, 0 0 25px #00ff99, 0 0 35px #00ccff; }
+  50% { box-shadow: 0 0 25px #00ffff, 0 0 35px #00ff99, 0 0 50px #00ccff; }
+  100% { box-shadow: 0 0 15px #00ffff, 0 0 25px #00ff99, 0 0 35px #00ccff; }
+}
+
+@media (max-width: 500px) {
+  h1 { font-size: 22px; }
+  .buttons { flex-direction: column; gap: 10px; }
+}
+</style>
 </head>
 <body>
 
-  <div class="logo"></div>
-  <h1 id="title"> <span id="text"></span><span class="cursor">|</span> </h1>
+<canvas id="bg"></canvas>
 
-  <div class="buttons">
-    <a href="gpt.html">Lancer l’assistant</a>
-    <a href="fb.html">Outils</a>
-  </div>
+<div class="logo"></div>
+<h1 id="title">Bienvenue sur Davbot App!<br>Comment puis-je vous aider aujourd'hui ?</h1>
 
-  <script>
-    const text = "Bienvenue sur Davbot App <p>.</p>\n\n comment puis-je vous aidez aujourd'hui ?";
-    const el = document.getElementById("text");
-    let i = 0;
-    function typeLetter() {
-      if (i < text.length) {
-        el.textContent += text.charAt(i);
-        i++;
-        setTimeout(typeLetter, 60);
+<div class="buttons">
+  <a href="gpt.html" class="launch">Lancer l’assistant</a>
+  <a href="https://portfolio-david-mpongo-chi.vercel.app/service.html" target="_blank">Portfolio</a>
+  <a href="https://portfolio-david-mpongo-chi.vercel.app/service.html" target="_blank">Services</a>
+  <a href="https://davbot-vpn.vercel.app/" target="_blank">Boutique VPN</a>
+  <a href="fb.html">Outils</a>
+</div>
+
+<script>
+// Particules interactives
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const particles = [];
+const colors = ['#00f0ff','#ff00ff','#00ff77','#ff7700'];
+const particleCount = 120;
+const connectDistance = 120;
+const mouse = { x:null, y:null, click:false };
+
+window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+window.addEventListener('mousedown', ()=>{ mouse.click = true; setTimeout(()=>mouse.click=false,100); });
+
+class Particle {
+  constructor() { this.reset(); }
+  reset(){
+    this.x = Math.random()*canvas.width;
+    this.y = Math.random()*canvas.height;
+    this.size = Math.random()*3 + 1;
+    this.speedX = (Math.random()-0.5)*1;
+    this.speedY = (Math.random()-0.5)*1;
+    this.color = colors[Math.floor(Math.random()*colors.length)];
+  }
+  update(){
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if(mouse.x && mouse.y){
+      const dx = mouse.x - this.x;
+      const dy = mouse.y - this.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist < 150){
+        this.x += dx*0.005;
+        this.y += dy*0.005;
+        if(mouse.click){
+          this.x += (Math.random()-0.5)*20;
+          this.y += (Math.random()-0.5)*20;
+        }
       }
     }
-    typeLetter();
-  </script>
+    if(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+  }
+  draw(){
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+for(let i=0;i<particleCount;i++) particles.push(new Particle());
+
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{ p.update(); p.draw(); });
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist < connectDistance){
+        ctx.strokeStyle = `rgba(0,255,255,${1 - dist/connectDistance})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+animate();
+window.addEventListener('resize', ()=>{ canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+// Son au survol du bouton “Lancer l’assistant”
+const launchBtn = document.querySelector('.launch');
+const hoverSound = new Audio('https://freesound.org/data/previews/522/522754_11746068-lq.mp3');
+let canPlay = true;
+launchBtn.addEventListener('mouseenter', ()=>{
+  if(canPlay){
+    hoverSound.currentTime = 0;
+    hoverSound.play();
+    canPlay = false;
+    setTimeout(()=>{ canPlay = true; }, 200);
+  }
+});
+
+// Déplacement léger du halo suivant le curseur
+document.addEventListener('mousemove', e=>{
+  const rect = launchBtn.getBoundingClientRect();
+  const halo = launchBtn.querySelector('::after'); // pseudo-element non directement accessible
+  const x = e.clientX - (rect.left + rect.width/2);
+  const y = e.clientY - (rect.top + rect.height/2);
+  launchBtn.style.setProperty('--halo-x', `${x*0.2}px`);
+  launchBtn.style.setProperty('--halo-y', `${y*0.2}px`);
+});
+</script>
 
 </body>
-</html>
+  </html>

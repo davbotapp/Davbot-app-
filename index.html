@@ -1,138 +1,289 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Davbot Chat - Bienvenue</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    /* Reset de base */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DavBot App</title>
+<link rel="icon" href="icon.png">
+<style>
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:#020617;
+  color:#e5e7eb;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+}
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #4b6cb7, #182848);
-      overflow: hidden;
-    }
+header{
+  padding:14px;
+  text-align:center;
+  background:#0c0c1a;
+  border-bottom:1px solid #1f2937;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  text-shadow: 0 0 5px #8b5cf6, 0 0 10px #8b5cf6, 0 0 20px #8b5cf6, 0 0 40px #8b5cf6;
+}
 
-    /* Animation des étoiles ou bulles en arrière-plan */
-    .background-animation {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      z-index: 0;
-    }
+header img{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  object-fit:cover;
+}
 
-    .bubble {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      animation: rise 8s infinite ease-in;
-    }
+.subtitle{font-size:12px;color:#9ca3af;}
 
-    @keyframes rise {
-      0% { transform: translateY(100vh) scale(0); opacity: 0; }
-      50% { opacity: 0.5; }
-      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-    }
+#chat{
+  flex:1;
+  overflow-y:auto;
+  padding:20px;
+}
 
-    /* Conteneur principal */
-    .container {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      color: #fff;
-      animation: fadeIn 2s ease forwards;
-    }
+.message{
+  max-width:800px;
+  margin:auto;
+  margin-bottom:18px;
+  line-height:1.6;
+  position:relative;
+  padding:10px 14px;
+  border-radius:15px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(5px);
+  color:#fff;
+  text-shadow:0 0 3px #8b5cf6;
+  box-shadow: 0 0 10px #8b5cf6, 0 0 20px #8b5cf6, 0 0 40px #8b5cf6;
+}
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+.user::before{content:"Pro : "; font-weight:bold; color:#facc15;}
+.bot::before{content:"Réponse DavBot : "; font-weight:bold; color:#34d399;}
 
-    h1 {
-      font-size: 3rem;
-      font-weight: 800;
-      margin-bottom: 20px;
-      animation: titleAnim 2s ease forwards;
-    }
+.timestamp{
+  font-size:10px;
+  color:#9ca3af;
+  margin-top:4px;
+}
 
-    @keyframes titleAnim {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
+.actions{
+  margin-top:6px;
+  display:flex;
+  gap:8px;
+}
 
-    p {
-      font-size: 1.2rem;
-      margin-bottom: 40px;
-      color: #ddd;
-      animation: fadeUp 2.5s ease forwards;
-    }
+.actions button{
+  font-size:11px;
+  background:#1f2937;
+  color:#fff;
+  border:none;
+  padding:4px 6px;
+  border-radius:6px;
+  cursor:pointer;
+  text-shadow:0 0 3px #8b5cf6;
+}
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+.input-area{
+  display:flex;
+  padding:10px;
+  background:#020617;
+  border-top:1px solid #1f2937;
+  gap:6px;
+  align-items:center;
+}
 
-    /* Bouton Commencer */
-    .btn-start {
-      padding: 15px 40px;
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #fff;
-      background: #ff4b2b;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      animation: fadeUp 3s ease forwards;
-    }
+input{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #1f2937;
+  background:#020617;
+  color:#fff;
+  text-shadow:0 0 2px #8b5cf6;
+}
 
-    .btn-start:hover {
-      transform: scale(1.1);
-      background: #ff416c;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-    }
-  </style>
+button{
+  padding:10px 14px;
+  border:none;
+  border-radius:10px;
+  background:#8b5cf6;
+  color:#fff;
+  font-weight:600;
+  text-shadow:0 0 3px #fff;
+}
+
+#humeurBtn{
+  background:#111;
+  padding:6px 10px;
+  border-radius:50px;
+  font-size:12px;
+  border:1px solid #8b5cf6;
+  cursor:pointer;
+  text-shadow:0 0 2px #8b5cf6;
+}
+#humeurMenu{
+  position:absolute;
+  background:#020617;
+  border:1px solid #8b5cf6;
+  padding:6px;
+  border-radius:8px;
+  display:none;
+  flex-direction:column;
+  gap:4px;
+}
+#humeurMenu button{
+  background:transparent;
+  border:none;
+  color:#fff;
+  cursor:pointer;
+  text-align:left;
+  font-size:12px;
+  text-shadow:0 0 2px #8b5cf6;
+}
+</style>
 </head>
 <body>
-  <div class="background-animation" id="bubbles"></div>
 
-  <div class="container">
-    <h1>Bienvenue sur Davbot Chat</h1>
-    <p>L’application de chatbot intelligente pour vos conversations.</p>
-    <button class="btn-start" onclick="openChatGPT()">Commencer</button>
+<header>
+  <img src="https://i.ibb.co/M5sJH30L/mysterious-hacker-figure-sitting-dark-260nw-2675788995.webp" alt="DavBot">
+  <div>
+    🤖 DAVBOT<br>
+    <span class="subtitle">Créé par David Mpongo - Informatique & Développement Web</span>
   </div>
+</header>
 
-  <script>
-    // Génération de bulles aléatoires pour l'arrière-plan
-    const bubbleContainer = document.getElementById('bubbles');
-    for(let i = 0; i < 30; i++) {
-      let bubble = document.createElement('div');
-      bubble.classList.add('bubble');
-      let size = Math.random() * 20 + 10; // taille aléatoire
-      bubble.style.width = size + 'px';
-      bubble.style.height = size + 'px';
-      bubble.style.left = Math.random() * 100 + 'vw';
-      bubble.style.animationDuration = (Math.random() * 5 + 5) + 's';
-      bubble.style.opacity = Math.random();
-      bubbleContainer.appendChild(bubble);
-    }
+<div style="position:relative; padding:10px;">
+  <button id="humeurBtn">⚙️ Mode : Poli</button>
+  <div id="humeurMenu">
+    <button data-mode="poli">Poli</button>
+    <button data-mode="méchant">Méchant</button>
+    <button data-mode="cruel">Cruel</button>
+    <button data-mode="logique">Logique</button>
+    <button data-mode="bref">Bref</button>
+    <button data-mode="démoniaque">Démoniaque</button>
+    <button data-mode="religieux">Religieux</button>
+  </div>
+</div>
 
-    // Fonction du bouton
-    function openChatGPT() {
-      window.open('https://chatgpt.com/', '_blank');
-    }
-  </script>
+<div id="chat"></div>
+
+<div class="input-area">
+  <input id="input" placeholder="Écris un message…">
+  <button onclick="sendMessage()">Envoyer</button>
+  <button onclick="startVoice()">🎤</button>
+</div>
+
+<script>
+// --- Paramètres ---
+const API_URL="https://arychauhann.onrender.com/api/gemini-proxy2";
+let history=JSON.parse(localStorage.getItem("davbot_history")||"[]");
+const chat=document.getElementById("chat");
+const input=document.getElementById("input");
+
+let mode = "poli"; // mode par défaut
+
+// --- Humeur menu ---
+const humeurBtn = document.getElementById("humeurBtn");
+const humeurMenu = document.getElementById("humeurMenu");
+
+humeurBtn.addEventListener("click", ()=>{ humeurMenu.style.display = humeurMenu.style.display==="flex"?"none":"flex"; });
+humeurMenu.querySelectorAll("button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    mode = btn.dataset.mode;
+    humeurBtn.textContent = `⚙️ Mode : ${mode.charAt(0).toUpperCase()+mode.slice(1)}`;
+    humeurMenu.style.display="none";
+  });
+});
+
+// --- Prompt ---
+function buildPrompt(userText){
+  const now = new Date();
+  const dateTime = `${now.getDate().toString().padStart(2,'0')}/${
+    (now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} ${
+    now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  return `
+Tu es DAVBOT, IA créée par David Mpongo (informatique & dev web).  
+Réponds selon le mode : ${mode}. Style rapide, clair, précis, pro, pas de blabla inutile.  
+Date et heure actuelles : ${dateTime}  
+Utilisateur : ${userText}  
+Assistant :`;
+}
+
+// --- Historique ---
+function saveHistory(){ localStorage.setItem("davbot_history",JSON.stringify(history)); }
+function render(){
+  chat.innerHTML="";
+  history.forEach((m,i)=> createMessage(m.text,m.type,i,false,m.time));
+  chat.scrollTop=chat.scrollHeight;
+}
+
+// --- Messages ---
+function createMessage(text,type,index,save=true,time){
+  const div=document.createElement("div");
+  div.className="message "+type;
+  div.innerHTML=`<div class="content"></div>
+  <div class="timestamp">${time||getTime()}</div>
+  <div class="actions">
+    <button onclick="copyMsg(${index})">Copier</button>
+    <button onclick="deleteMsg(${index})">Supprimer</button>
+  </div>`;
+  chat.appendChild(div);
+
+  if(save){ history.push({text,type,time:getTime()}); saveHistory(); }
+
+  typeWriter(div.querySelector(".content"),text);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+// --- Effet écriture ---
+function typeWriter(el,text){
+  let i=0;
+  const speed=15;
+  function typing(){ if(i<text.length){ el.innerHTML+=text.charAt(i); i++; setTimeout(typing,speed); } }
+  typing();
+}
+
+// --- Horodatage ---
+function getTime(){ const d=new Date(); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
+
+// --- Envoi message ---
+async function sendMessage(){
+  const text=input.value.trim();
+  if(!text) return;
+  input.value="";
+  createMessage(text,"user",history.length,getTime());
+
+  try{
+    const prompt = encodeURIComponent(buildPrompt(text));
+    const res = await fetch(`${API_URL}?prompt=${prompt}`);
+    const data = await res.json();
+    const reply = data.result||data.reply||data.response||"Erreur";
+    createMessage(reply,"bot",history.length,true,getTime());
+  }catch{
+    createMessage("⚠️ Hors ligne ou serveur indisponible","bot",history.length,true,getTime());
+  }
+}
+
+// --- Supprimer / Copier ---
+function deleteMsg(i){ history.splice(i,1); saveHistory(); render(); }
+function copyMsg(i){ navigator.clipboard.writeText(history[i].text); alert("Message copié"); }
+
+// --- Dictée vocale ---
+function startVoice(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){ alert("Vocal non supporté"); return;}
+  const recog = new SpeechRecognition();
+  recog.lang="fr-FR";
+  recog.start();
+  recog.onresult = e => { input.value = e.results[0][0].transcript; };
+}
+
+// --- Entrée clavier ---
+input.addEventListener("keydown",e=>{ if(e.key==="Enter") sendMessage(); });
+
+// --- Init ---
+render();
+</script>
 </body>
 </html>

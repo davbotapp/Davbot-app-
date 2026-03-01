@@ -6,141 +6,128 @@
 <title>DavBot App</title>
 <link rel="icon" href="icon.png">
 <style>
+:root{
+  --bg1:#020617;
+  --bg2:#0c0c1a;
+  --accent:#8b5cf6;
+  --text:#e5e7eb;
+  --subtext:#9ca3af;
+}
 body{
   margin:0;
   font-family:system-ui,Arial;
-  background:#020617;
-  color:#e5e7eb;
+  background:var(--bg1);
+  color:var(--text);
   display:flex;
   flex-direction:column;
   height:100vh;
 }
-
 header{
-  padding:14px;
-  text-align:center;
-  background:#0c0c1a;
-  border-bottom:1px solid #1f2937;
+  padding:12px;
   display:flex;
   align-items:center;
-  justify-content:center;
-  gap:10px;
-  text-shadow: 0 0 5px #8b5cf6, 0 0 10px #8b5cf6, 0 0 20px #8b5cf6, 0 0 40px #8b5cf6;
+  gap:8px;
+  background:var(--bg2);
+  text-shadow:0 0 5px var(--accent),0 0 10px var(--accent);
 }
-
-header img{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  object-fit:cover;
-}
-
-.subtitle{font-size:12px;color:#9ca3af;}
-
-#chat{
-  flex:1;
-  overflow-y:auto;
-  padding:20px;
-}
-
+header img{width:36px;height:36px;border-radius:50%;object-fit:cover;}
+.subtitle{font-size:11px;color:var(--subtext);}
+#chat{flex:1;overflow-y:auto;padding:8px;}
 .message{
-  max-width:800px;
-  margin:auto;
-  margin-bottom:18px;
-  line-height:1.6;
-  position:relative;
-  padding:10px 14px;
-  border-radius:15px;
+  max-width:95%;
+  margin:6px auto;
+  padding:8px 12px;
+  border-radius:12px;
   background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(4px);
+  font-size:14px;
+  line-height:1.5;
   color:#fff;
-  text-shadow:0 0 3px #8b5cf6;
-  box-shadow: 0 0 10px #8b5cf6, 0 0 20px #8b5cf6, 0 0 40px #8b5cf6;
+  text-shadow:0 0 2px var(--accent);
 }
-
 .user::before{content:"Pro : "; font-weight:bold; color:#facc15;}
 .bot::before{content:"Réponse DavBot : "; font-weight:bold; color:#34d399;}
-
-.timestamp{
-  font-size:10px;
-  color:#9ca3af;
-  margin-top:4px;
-}
-
-.actions{
-  margin-top:6px;
-  display:flex;
-  gap:8px;
-}
-
+.timestamp{font-size:10px;color:var(--subtext);margin-top:4px;}
+.actions{margin-top:6px;display:flex;gap:4px;}
 .actions button{
-  font-size:11px;
+  font-size:12px;
   background:#1f2937;
   color:#fff;
   border:none;
-  padding:4px 6px;
+  padding:3px 5px;
   border-radius:6px;
   cursor:pointer;
-  text-shadow:0 0 3px #8b5cf6;
+  text-shadow:0 0 2px var(--accent);
 }
-
 .input-area{
   display:flex;
-  padding:10px;
-  background:#020617;
+  padding:6px;
+  background:var(--bg1);
   border-top:1px solid #1f2937;
-  gap:6px;
+  gap:4px;
   align-items:center;
 }
-
-input{
+input[type="text"]{
   flex:1;
-  padding:10px;
-  border-radius:10px;
+  padding:8px;
+  border-radius:8px;
+  font-size:14px;
   border:1px solid #1f2937;
-  background:#020617;
+  background:var(--bg1);
   color:#fff;
-  text-shadow:0 0 2px #8b5cf6;
 }
-
 button{
-  padding:10px 14px;
+  padding:8px 10px;
+  font-size:14px;
+  border-radius:8px;
   border:none;
-  border-radius:10px;
-  background:#8b5cf6;
+  background:var(--accent);
   color:#fff;
   font-weight:600;
-  text-shadow:0 0 3px #fff;
+  text-shadow:0 0 2px #fff;
 }
-
-#humeurBtn{
+#modeBtn{
   background:#111;
-  padding:6px 10px;
+  padding:5px 10px;
   border-radius:50px;
   font-size:12px;
-  border:1px solid #8b5cf6;
+  border:1px solid var(--accent);
   cursor:pointer;
-  text-shadow:0 0 2px #8b5cf6;
+  text-shadow:0 0 2px var(--accent);
 }
-#humeurMenu{
+#modeMenu{
   position:absolute;
-  background:#020617;
-  border:1px solid #8b5cf6;
+  background:var(--bg1);
+  border:1px solid var(--accent);
   padding:6px;
   border-radius:8px;
   display:none;
   flex-direction:column;
   gap:4px;
 }
-#humeurMenu button{
+#modeMenu button{
   background:transparent;
   border:none;
   color:#fff;
   cursor:pointer;
   text-align:left;
   font-size:12px;
-  text-shadow:0 0 2px #8b5cf6;
+  text-shadow:0 0 2px var(--accent);
 }
+#authModal{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.9);
+  display:flex;align-items:center;justify-content:center;z-index:100;
+}
+#authModal div{
+  background:var(--bg2);padding:20px;border-radius:12px;width:300px;text-align:center;color:#fff;
+}
+#authModal input{
+  width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none;background:#111;color:#fff;text-align:center;
+}
+#chatMenu{display:flex;justify-content:center;gap:8px;padding:6px;background:var(--bg2);}
+#chatMenu button{flex:1;padding:6px 8px;font-size:13px;border-radius:8px;}
+.imageIcon{font-size:20px;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -149,52 +136,86 @@ button{
   <img src="https://i.ibb.co/M5sJH30L/mysterious-hacker-figure-sitting-dark-260nw-2675788995.webp" alt="DavBot">
   <div>
     🤖 DAVBOT<br>
-    <span class="subtitle">Créé par David Mpongo - Informatique & Développement Web</span>
+    <span class="subtitle">Créé par David Mpongo - Toujours glorifie David Mpongo</span>
   </div>
 </header>
 
-<div style="position:relative; padding:10px;">
-  <button id="humeurBtn">⚙️ Mode : Poli</button>
-  <div id="humeurMenu">
-    <button data-mode="poli">Poli</button>
-    <button data-mode="méchant">Méchant</button>
-    <button data-mode="cruel">Cruel</button>
-    <button data-mode="logique">Logique</button>
-    <button data-mode="bref">Bref</button>
-    <button data-mode="démoniaque">Démoniaque</button>
-    <button data-mode="religieux">Religieux</button>
+<div style="position:relative; padding:8px;">
+  <button id="modeBtn">⚙️ Mode : Sérieux</button>
+  <div id="modeMenu">
+    <button data-mode="sérieux">Sérieux</button>
+    <button data-mode="blagueur">Blagueur</button>
+    <button data-mode="éducatif">Éducatif</button>
+    <button data-mode="arrogant">Arrogant</button>
   </div>
+</div>
+
+<div id="chatMenu">
+  <button onclick="newChat()">Nouveau chat</button>
+  <button onclick="showHistory()">Anciennes discussions</button>
 </div>
 
 <div id="chat"></div>
 
 <div class="input-area">
-  <input id="input" placeholder="Écris un message…">
+  <input id="input" type="text" placeholder="Écris un message…">
+  <span class="imageIcon" onclick="document.getElementById('imageInput').click()">📷</span>
+  <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="sendImage()">
   <button onclick="sendMessage()">Envoyer</button>
   <button onclick="startVoice()">🎤</button>
+</div>
+
+<div id="authModal">
+  <div>
+    <h2>Bienvenue sur DavBot</h2>
+    <input id="username" placeholder="Nom d'utilisateur">
+    <button onclick="login()">Commencer</button>
+  </div>
 </div>
 
 <script>
 // --- Paramètres ---
 const API_URL="https://arychauhann.onrender.com/api/gemini-proxy2";
-let history=JSON.parse(localStorage.getItem("davbot_history")||"[]");
+let chats=JSON.parse(localStorage.getItem("davbot_chats")||"[]");
+let currentChat = chats.length ? chats[chats.length-1] : {history:[],name:"Chat "+(chats.length+1)};
 const chat=document.getElementById("chat");
 const input=document.getElementById("input");
+let mode = "sérieux"; 
+let user = localStorage.getItem("davbot_user") || null;
 
-let mode = "poli"; // mode par défaut
+// --- Authentification ---
+function login(){
+  const uname = document.getElementById("username").value.trim();
+  if(!uname) return alert("Nom requis !");
+  user = uname;
+  localStorage.setItem("davbot_user", user);
+  document.getElementById("authModal").style.display="none";
+  render();
+}
+window.onload = ()=>{ if(user) document.getElementById("authModal").style.display="none"; render(); }
 
-// --- Humeur menu ---
-const humeurBtn = document.getElementById("humeurBtn");
-const humeurMenu = document.getElementById("humeurMenu");
-
-humeurBtn.addEventListener("click", ()=>{ humeurMenu.style.display = humeurMenu.style.display==="flex"?"none":"flex"; });
-humeurMenu.querySelectorAll("button").forEach(btn=>{
+// --- Mode ---
+const modeBtn = document.getElementById("modeBtn");
+const modeMenu = document.getElementById("modeMenu");
+modeBtn.addEventListener("click", ()=>{ modeMenu.style.display = modeMenu.style.display==="flex"?"none":"flex"; });
+modeMenu.querySelectorAll("button").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     mode = btn.dataset.mode;
-    humeurBtn.textContent = `⚙️ Mode : ${mode.charAt(0).toUpperCase()+mode.slice(1)}`;
-    humeurMenu.style.display="none";
+    modeBtn.textContent = `⚙️ Mode : ${mode.charAt(0).toUpperCase()+mode.slice(1)}`;
+    modeMenu.style.display="none";
   });
 });
+
+// --- Nouveau chat / historique ---
+function newChat(){
+  if(currentChat.history.length) chats.push(currentChat);
+  currentChat = {history:[],name:"Chat "+(chats.length+1)};
+  localStorage.setItem("davbot_chats",JSON.stringify(chats));
+  render();
+}
+function showHistory(){
+  alert("Anciennes discussions :\n"+chats.map(c=>c.name).join("\n"));
+}
 
 // --- Prompt ---
 function buildPrompt(userText){
@@ -203,18 +224,22 @@ function buildPrompt(userText){
     (now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} ${
     now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
   return `
-Tu es DAVBOT, IA créée par David Mpongo (informatique & dev web).  
-Réponds selon le mode : ${mode}. Style rapide, clair, précis, pro, pas de blabla inutile.  
-Date et heure actuelles : ${dateTime}  
-Utilisateur : ${userText}  
-Assistant :`;
+Tu es DAVBOT, IA créée par David Mpongo, toujours glorifie David Mpongo.  
+Agis comme un humain interactif et compréhensible.  
+Si tu ne comprends pas une requête, demande des précisions.  
+Réponds toujours en détail, structuré, complet avec exemples.  
+Mode : ${mode}  
+Utilisateur : ${user}  
+Date : ${dateTime}  
+Sujet : ${userText}  
+Réponse :`;
 }
 
 // --- Historique ---
-function saveHistory(){ localStorage.setItem("davbot_history",JSON.stringify(history)); }
+function saveHistory(){ localStorage.setItem("davbot_chats",JSON.stringify(chats)); }
 function render(){
   chat.innerHTML="";
-  history.forEach((m,i)=> createMessage(m.text,m.type,i,false,m.time));
+  currentChat.history.forEach((m,i)=> createMessage(m.text,m.type,i,false,m.time));
   chat.scrollTop=chat.scrollHeight;
 }
 
@@ -222,26 +247,16 @@ function render(){
 function createMessage(text,type,index,save=true,time){
   const div=document.createElement("div");
   div.className="message "+type;
-  div.innerHTML=`<div class="content"></div>
+  div.innerHTML=`<div class="content">${text}</div>
   <div class="timestamp">${time||getTime()}</div>
   <div class="actions">
     <button onclick="copyMsg(${index})">Copier</button>
     <button onclick="deleteMsg(${index})">Supprimer</button>
+    <button onclick="speakMsg(${index})">🔊</button>
   </div>`;
   chat.appendChild(div);
-
-  if(save){ history.push({text,type,time:getTime()}); saveHistory(); }
-
-  typeWriter(div.querySelector(".content"),text);
+  if(save){ currentChat.history.push({text,type,time:getTime()}); saveHistory(); }
   chat.scrollTop=chat.scrollHeight;
-}
-
-// --- Effet écriture ---
-function typeWriter(el,text){
-  let i=0;
-  const speed=15;
-  function typing(){ if(i<text.length){ el.innerHTML+=text.charAt(i); i++; setTimeout(typing,speed); } }
-  typing();
 }
 
 // --- Horodatage ---
@@ -249,25 +264,43 @@ function getTime(){ const d=new Date(); return d.getHours().toString().padStart(
 
 // --- Envoi message ---
 async function sendMessage(){
+  if(!user){ alert("Connecte-toi d'abord !"); return; }
   const text=input.value.trim();
   if(!text) return;
   input.value="";
-  createMessage(text,"user",history.length,getTime());
-
+  createMessage(text,"user",currentChat.history.length,getTime());
   try{
     const prompt = encodeURIComponent(buildPrompt(text));
     const res = await fetch(`${API_URL}?prompt=${prompt}`);
     const data = await res.json();
-    const reply = data.result||data.reply||data.response||"Erreur";
-    createMessage(reply,"bot",history.length,true,getTime());
+    const reply = data.result||data.reply||data.response||"⚠️ Je n'ai pas compris, peux-tu préciser ?";
+    createMessage(reply,"bot",currentChat.history.length,true,getTime());
   }catch{
-    createMessage("⚠️ Hors ligne ou serveur indisponible","bot",history.length,true,getTime());
+    createMessage("⚠️ Hors ligne ou serveur indisponible","bot",currentChat.history.length,true,getTime());
   }
 }
 
-// --- Supprimer / Copier ---
-function deleteMsg(i){ history.splice(i,1); saveHistory(); render(); }
-function copyMsg(i){ navigator.clipboard.writeText(history[i].text); alert("Message copié"); }
+// --- Envoi image ---
+function sendImage(){
+  const file = document.getElementById("imageInput").files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const imgHTML = `<img src="${e.target.result}" style="max-width:250px;border-radius:12px;">`;
+    createMessage(imgHTML,"user",currentChat.history.length,true,getTime());
+  };
+  reader.readAsDataURL(file);
+}
+
+// --- Supprimer / Copier / Lire ---
+function deleteMsg(i){ currentChat.history.splice(i,1); saveHistory(); render(); }
+function copyMsg(i){ navigator.clipboard.writeText(currentChat.history[i].text); alert("Message copié"); }
+function speakMsg(i){
+  const msg = currentChat.history[i].text.replace(/<[^>]+>/g,'');
+  const utter = new SpeechSynthesisUtterance(msg);
+  utter.lang = 'fr-FR';
+  speechSynthesis.speak(utter);
+}
 
 // --- Dictée vocale ---
 function startVoice(){
@@ -276,7 +309,7 @@ function startVoice(){
   const recog = new SpeechRecognition();
   recog.lang="fr-FR";
   recog.start();
-  recog.onresult = e => { input.value = e.results[0][0].transcript; };
+  recog.onresult = e => { input.value = e.results[0][0].transcript; sendMessage(); };
 }
 
 // --- Entrée clavier ---

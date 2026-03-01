@@ -7,135 +7,64 @@
 <link rel="icon" href="icon.png">
 <style>
 :root{
-  --bg1:#020617;
-  --bg2:#0c0c1a;
-  --accent:#8b5cf6;
-  --text:#e5e7eb;
-  --subtext:#9ca3af;
+  --bg1:#020617; --bg2:#0c0c1a; --accent:#8b5cf6; --text:#e5e7eb; --subtext:#9ca3af;
 }
 body{
-  margin:0;
-  font-family:system-ui,Arial;
-  background:var(--bg1);
-  color:var(--text);
-  display:flex;
-  flex-direction:column;
-  height:100vh;
+  margin:0; font-family:system-ui,Arial; background:var(--bg1); color:var(--text);
+  display:flex; flex-direction:column; height:100vh;
 }
 header{
-  padding:12px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  background:var(--bg2);
+  padding:12px; display:flex; align-items:center; gap:8px; background:var(--bg2);
   text-shadow:0 0 5px var(--accent),0 0 10px var(--accent);
 }
-header img{width:36px;height:36px;border-radius:50%;object-fit:cover;}
+header img{width:40px;height:40px;border-radius:50%;object-fit:cover;}
 .subtitle{font-size:11px;color:var(--subtext);}
 #chat{flex:1;overflow-y:auto;padding:8px;}
 .message{
-  max-width:95%;
-  margin:6px auto;
-  padding:8px 12px;
-  border-radius:12px;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(4px);
-  font-size:14px;
-  line-height:1.5;
-  color:#fff;
-  text-shadow:0 0 2px var(--accent);
+  max-width:95%; margin:6px auto; padding:8px 12px; border-radius:12px;
+  background: rgba(255,255,255,0.05); backdrop-filter: blur(4px);
+  font-size:14px; line-height:1.5; color:#fff; text-shadow:0 0 2px var(--accent);
 }
 .user::before{content:"Pro : "; font-weight:bold; color:#facc15;}
 .bot::before{content:"Réponse DavBot : "; font-weight:bold; color:#34d399;}
 .timestamp{font-size:10px;color:var(--subtext);margin-top:4px;}
 .actions{margin-top:6px;display:flex;gap:4px;}
 .actions button{
-  font-size:12px;
-  background:#1f2937;
-  color:#fff;
-  border:none;
-  padding:3px 5px;
-  border-radius:6px;
-  cursor:pointer;
-  text-shadow:0 0 2px var(--accent);
+  font-size:12px; background:#1f2937; color:#fff; border:none; padding:3px 5px;
+  border-radius:6px; cursor:pointer; text-shadow:0 0 2px var(--accent);
 }
 .input-area{
-  display:flex;
-  padding:6px;
-  background:var(--bg1);
-  border-top:1px solid #1f2937;
-  gap:4px;
-  align-items:center;
+  display:flex; padding:6px; background:var(--bg1); border-top:1px solid #1f2937;
+  gap:4px; align-items:center;
 }
 input[type="text"]{
-  flex:1;
-  padding:8px;
-  border-radius:8px;
-  font-size:14px;
-  border:1px solid #1f2937;
-  background:var(--bg1);
-  color:#fff;
+  flex:1; padding:8px; border-radius:8px; font-size:14px;
+  border:1px solid #1f2937; background:var(--bg1); color:#fff;
 }
-button{
-  padding:8px 10px;
-  font-size:14px;
-  border-radius:8px;
-  border:none;
-  background:var(--accent);
-  color:#fff;
-  font-weight:600;
-  text-shadow:0 0 2px #fff;
+button{padding:8px 10px; font-size:14px; border-radius:8px; border:none;
+  background:var(--accent); color:#fff; font-weight:600; text-shadow:0 0 2px #fff;
 }
-#modeBtn{
-  background:#111;
-  padding:5px 10px;
-  border-radius:50px;
-  font-size:12px;
-  border:1px solid var(--accent);
-  cursor:pointer;
-  text-shadow:0 0 2px var(--accent);
-}
-#modeMenu{
-  position:absolute;
-  background:var(--bg1);
-  border:1px solid var(--accent);
-  padding:6px;
-  border-radius:8px;
-  display:none;
-  flex-direction:column;
-  gap:4px;
-}
-#modeMenu button{
-  background:transparent;
-  border:none;
-  color:#fff;
-  cursor:pointer;
-  text-align:left;
-  font-size:12px;
-  text-shadow:0 0 2px var(--accent);
-}
-#authModal{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.9);
-  display:flex;align-items:center;justify-content:center;z-index:100;
-}
-#authModal div{
-  background:var(--bg2);padding:20px;border-radius:12px;width:300px;text-align:center;color:#fff;
-}
-#authModal input{
-  width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none;background:#111;color:#fff;text-align:center;
-}
+#modeBtn{background:#111; padding:5px 10px; border-radius:50px; font-size:12px;
+  border:1px solid var(--accent); cursor:pointer; text-shadow:0 0 2px var(--accent);}
+#modeMenu{position:absolute; background:var(--bg1); border:1px solid var(--accent);
+  padding:6px; border-radius:8px; display:none; flex-direction:column; gap:4px;}
+#modeMenu button{background:transparent; border:none; color:#fff; cursor:pointer;
+  text-align:left; font-size:12px; text-shadow:0 0 2px var(--accent);}
+#authModal{position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.9); display:flex;align-items:center;justify-content:center;z-index:100;}
+#authModal div{background:var(--bg2);padding:20px;border-radius:12px;width:300px;text-align:center;color:#fff;}
+#authModal input{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none;background:#111;color:#fff;text-align:center;}
 #chatMenu{display:flex;justify-content:center;gap:8px;padding:6px;background:var(--bg2);}
 #chatMenu button{flex:1;padding:6px 8px;font-size:13px;border-radius:8px;}
 .imageIcon{font-size:20px;cursor:pointer;}
+img.messageImg{max-width:250px;border-radius:12px;margin-top:4px;}
 </style>
 </head>
 <body>
 
 <header>
   <img src="https://i.ibb.co/M5sJH30L/mysterious-hacker-figure-sitting-dark-260nw-2675788995.webp" alt="DavBot">
-  <div>
-    🤖 DAVBOT<br>
+  <div>🤖 DAVBOT<br>
     <span class="subtitle">Créé par David Mpongo - Toujours glorifie David Mpongo</span>
   </div>
 </header>
@@ -227,7 +156,7 @@ function buildPrompt(userText){
 Tu es DAVBOT, IA créée par David Mpongo, toujours glorifie David Mpongo.  
 Agis comme un humain interactif et compréhensible.  
 Si tu ne comprends pas une requête, demande des précisions.  
-Réponds toujours en détail, structuré, complet avec exemples.  
+Réponds toujours en détail, structuré, complet avec exemples. 
 Mode : ${mode}  
 Utilisateur : ${user}  
 Date : ${dateTime}  
@@ -257,6 +186,9 @@ function createMessage(text,type,index,save=true,time){
   chat.appendChild(div);
   if(save){ currentChat.history.push({text,type,time:getTime()}); saveHistory(); }
   chat.scrollTop=chat.scrollHeight;
+
+  // --- Lecture automatique si bot ---
+  if(type==="bot"){ speakMsg(index); }
 }
 
 // --- Horodatage ---
@@ -286,7 +218,7 @@ function sendImage(){
   if(!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const imgHTML = `<img src="${e.target.result}" style="max-width:250px;border-radius:12px;">`;
+    const imgHTML = `<img src="${e.target.result}" class="messageImg">`;
     createMessage(imgHTML,"user",currentChat.history.length,true,getTime());
   };
   reader.readAsDataURL(file);
@@ -294,11 +226,14 @@ function sendImage(){
 
 // --- Supprimer / Copier / Lire ---
 function deleteMsg(i){ currentChat.history.splice(i,1); saveHistory(); render(); }
-function copyMsg(i){ navigator.clipboard.writeText(currentChat.history[i].text); alert("Message copié"); }
+function copyMsg(i){ navigator.clipboard.writeText(currentChat.history[i].text.replace(/<[^>]+>/g,'')); alert("Message copié"); }
 function speakMsg(i){
+  if(!('speechSynthesis' in window)){ alert("Lecture vocale non supportée"); return; }
   const msg = currentChat.history[i].text.replace(/<[^>]+>/g,'');
+  if(!msg) return;
   const utter = new SpeechSynthesisUtterance(msg);
   utter.lang = 'fr-FR';
+  speechSynthesis.cancel();
   speechSynthesis.speak(utter);
 }
 

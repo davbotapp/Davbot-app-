@@ -1,41 +1,37 @@
 // ==========================================
 // DAVBOT AI APP.JS - PARTIE 1/3
-// Assistant IA personnalisé
+// Firebase + Mémoire + Interface
 // ==========================================
 
 
-// ================= API ====================
+// ================= API =================
 
-const GEM_API = "https://christus-gem-api.onrender.com";
+const GEM_API =
+"https://christus-gem-api.onrender.com";
+
 
 const COPILOT_API =
 "https://celestin-api.onrender.com/api/v1/copilot";
 
 
 
+// ================= FIREBASE =================
 
-// ================= FIREBASE ===============
-
-import { initializeApp }
+import {initializeApp}
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
 
 import {
-
 getDatabase,
 ref,
 push,
 set,
 onValue,
 remove
-
 }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 
-
-
-// Configuration Firebase
 
 const firebaseConfig = {
 
@@ -59,7 +55,6 @@ const firebaseApp =
 initializeApp(firebaseConfig);
 
 
-
 const db =
 getDatabase(firebaseApp);
 
@@ -67,8 +62,7 @@ getDatabase(firebaseApp);
 
 
 
-
-// ================= ELEMENTS ===============
+// ================= ELEMENTS =================
 
 
 const messages =
@@ -97,32 +91,24 @@ document.getElementById("audioBtn");
 
 
 
-
-
-
-// ================= SESSION ================
+// ================= SESSION =================
 
 
 let sessionId =
-localStorage.getItem("davbot_session");
+localStorage.getItem("davbot_chat");
 
 
 
 if(!sessionId){
 
-
 sessionId =
-Math.random()
-.toString(36)
-.substring(2,15);
-
+Date.now().toString();
 
 
 localStorage.setItem(
-"davbot_session",
+"davbot_chat",
 sessionId
 );
-
 
 }
 
@@ -130,38 +116,60 @@ sessionId
 
 
 
-let pendingImage = null;
+let pendingImage=null;
 
-let pendingImagePreview = null;
-
-
+let pendingImagePreview=null;
 
 
 
 
 
+// ================= IDENTITE DAVBOT =================
 
-// ================= NETTOYAGE ==============
+
+const identity = `
+
+Tu es DAVBOT AI.
+
+Tu es un assistant intelligent créé pour le projet DAVBOT.
+
+Informations :
+
+Nom : DAVBOT AI
+
+Créateur du projet :
+Ir David Mpongo 🇨🇩
+
+Domaine :
+- Intelligence artificielle
+- Programmation
+- Applications web et mobiles
+- Technologie
+
+Tu aides les utilisateurs avec des réponses utiles,
+claires et professionnelles.
+
+`;
+
+
+
+
+
+// ================= NETTOYAGE =================
 
 
 function cleanAnswer(text){
 
-
 if(!text)
 return "";
 
-
-
 return text
-
 .replace(/\*/g,"")
-
 .replace(
 /\bChatGPT\b/gi,
 "DAVBOT AI"
 );
 
-
 }
 
 
@@ -169,38 +177,34 @@ return text
 
 
 
-
-
-
-// ================= AFFICHAGE MESSAGE ======
+// ================= AFFICHAGE MESSAGE =================
 
 
 function addMessage(
 text,
 type,
-isImage=false,
+image=false,
 imageUrl=null
 ){
 
 
-
-const div =
+const box =
 document.createElement("div");
 
 
-
-div.className =
+box.className =
 "msg "+type;
 
 
 
+let content="";
 
 
-if(isImage && imageUrl){
+
+if(image && imageUrl){
 
 
-div.innerHTML = `
-
+content = `
 
 <div class="content">
 
@@ -208,22 +212,18 @@ ${text}
 
 <br>
 
-
 <img 
 src="${imageUrl}"
 class="image-preview"
 >
 
-
 <br>
 
 
-<a 
-class="download"
-href="${imageUrl}"
+<a href="${imageUrl}"
 download="davbot-image.jpg">
 
-⬇️ Télécharger
+⬇ Télécharger
 
 </a>
 
@@ -231,55 +231,30 @@ download="davbot-image.jpg">
 </div>
 
 
-
-<div class="actions">
-
-
-<button onclick="copyMessage(this)">
-📋
-</button>
-
-
-<button onclick="voiceMessage(this)">
-🔊
-</button>
-
-
-<button onclick="deleteMessage(this)">
-🗑️
-</button>
-
-
-
-</div>
-
-
-
 `;
 
 
 
-}
-
-else{
+}else{
 
 
-div.innerHTML = `
-
+content = `
 
 <div class="content">
-
 ${type==="ai"
-? cleanAnswer(text)
+?cleanAnswer(text)
 :text}
-
 </div>
 
+`;
+
+}
 
 
+
+content += `
 
 <div class="actions">
-
 
 <button onclick="copyMessage(this)">
 📋
@@ -298,18 +273,14 @@ ${type==="ai"
 
 </div>
 
-
-
 `;
 
 
 
-}
+box.innerHTML=content;
 
 
-
-messages.appendChild(div);
-
+messages.appendChild(box);
 
 
 messages.scrollTop =
@@ -317,63 +288,7 @@ messages.scrollHeight;
 
 
 
-return div;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ================= ECRITURE IA ============
-
-
-function typingEffect(
-element,
-text
-){
-
-
-
-let i=0;
-
-
-
-element.innerHTML="";
-
-
-
-let timer =
-setInterval(()=>{
-
-
-
-element.innerHTML += text[i];
-
-
-
-i++;
-
-
-
-if(i>=text.length){
-
-
-clearInterval(timer);
-
-
-}
-
-
-
-},35);
-
+return box;
 
 
 }
@@ -384,22 +299,19 @@ clearInterval(timer);
 
 
 
+// ================= SAUVEGARDE FIREBASE =================
 
-// ================= SAUVEGARDE FIREBASE ====
 
-
-function saveMessage(
-role,
-text
-){
-
+function saveMessage(role,text){
 
 
 const id =
 push(
-ref(db,`davbot/${sessionId}/messages`)
+ref(
+db,
+"davbot/"+sessionId
+)
 ).key;
-
 
 
 
@@ -407,27 +319,73 @@ set(
 
 ref(
 db,
-`davbot/${sessionId}/messages/${id}`
+"davbot/"+sessionId+"/"+id
 ),
 
 {
-
 
 role:role,
 
 text:text,
 
-date:Date.now()
-
+time:Date.now()
 
 }
-
 
 );
 
 
-
 }
+
+
+
+
+
+
+
+// ================= CHARGER MEMOIRE =================
+
+
+onValue(
+
+ref(
+db,
+"davbot/"+sessionId
+),
+
+snap=>{
+
+
+if(!snap.exists())
+return;
+
+
+
+messages.innerHTML="";
+
+
+
+Object.values(
+snap.val()
+)
+
+.sort(
+(a,b)=>a.time-b.time
+)
+
+.forEach(m=>{
+
+
+addMessage(
+m.text,
+m.role
+);
+
+
+});
+
+
+});
 // ==========================================
 // DAVBOT AI APP.JS - PARTIE 2/3
 // API IA + IMAGE + MEMOIRE
@@ -435,57 +393,41 @@ date:Date.now()
 
 
 
-// =============== REPONSE IA COPILOT =================
+// ================= REPONSE IA =================
 
 
-async function getAIResponse(message){
+async function getAIResponse(userMessage){
 
 
 try{
 
 
-const identity = `
+const prompt =
 
-Tu es DAVBOT AI.
+identity +
 
-Tu es l'assistant intelligent intégré dans l'application DAVBOT.
+`
 
-Informations du projet :
-- Nom : DAVBOT AI
-- Créateur du projet : Ir David Mpongo 🇨🇩
-- Domaine : intelligence artificielle, programmation, technologie, applications web et mobiles.
+Historique de la conversation :
+Tu dois garder le contexte de cette discussion.
 
-Tu aides les utilisateurs avec :
-- programmation
-- développement web
-- développement mobile
-- création d'applications
-- intelligence artificielle
-- questions générales.
+Utilisateur :
+${userMessage}
 
-Réponds de manière claire, professionnelle et utile.
-
+Réponds en français.
 `;
 
 
 
-const prompt =
-identity
-+
-"\nUtilisateur : "
-+
-message;
-
-
-
-
 const url =
+
 `${COPILOT_API}?message=${encodeURIComponent(prompt)}&model=default`;
 
 
 
 
 const response =
+
 await fetch(url);
 
 
@@ -493,17 +435,15 @@ await fetch(url);
 if(!response.ok){
 
 throw new Error(
-"Erreur connexion IA"
+"Erreur serveur IA"
 );
 
 }
 
 
 
-
 const data =
 await response.json();
-
 
 
 
@@ -532,19 +472,13 @@ return "Je n'ai pas trouvé de réponse.";
 catch(error){
 
 
-console.error(
-"Erreur IA:",
-error
-);
+console.log(error);
 
 
-
-return "❌ DAVBOT AI est momentanément indisponible.";
-
-
+return 
+"❌ DAVBOT AI est indisponible actuellement.";
 
 }
-
 
 
 }
@@ -556,7 +490,7 @@ return "❌ DAVBOT AI est momentanément indisponible.";
 
 
 
-// =============== GENERATION IMAGE =================
+// ================= GENERATION IMAGE =================
 
 
 
@@ -565,25 +499,22 @@ async function generateImage(prompt){
 
 
 const response =
+
 await fetch(
 
 `${GEM_API}/generate`,
 
 {
 
-
 method:"POST",
 
 
 headers:{
 
-
 "Content-Type":
 "application/json"
 
-
 },
-
 
 
 body:JSON.stringify({
@@ -594,28 +525,23 @@ ratio:"1:1",
 
 format:"jpg"
 
-
 })
+
 
 }
 
-
 );
-
 
 
 
 
 if(!response.ok){
 
-
 throw new Error(
-"Erreur génération image"
+"Erreur création image"
 );
 
-
 }
-
 
 
 
@@ -625,15 +551,13 @@ await response.blob();
 
 
 
+// Correction image invisible
 
-
-if(
-!blob.type.includes("image")
-){
+if(!blob.type.includes("image")){
 
 
 throw new Error(
-"La réponse n'est pas une image"
+"Le serveur n'a pas envoyé une image"
 );
 
 
@@ -641,11 +565,7 @@ throw new Error(
 
 
 
-
-
 return URL.createObjectURL(blob);
-
-
 
 
 
@@ -658,71 +578,50 @@ return URL.createObjectURL(blob);
 
 
 
-
-// =============== MODIFIER IMAGE =================
+// ================= MODIFICATION IMAGE =================
 
 
 
 async function editImage(
-imageBase64,
+base64,
 prompt
 ){
 
 
 
 const response =
+
 await fetch(
 
 `${GEM_API}/edit`,
 
 {
 
-
 method:"POST",
 
 
 headers:{
 
-
 "Content-Type":
 "application/json"
-
 
 },
 
 
 body:JSON.stringify({
 
-image:imageBase64,
+image:base64,
 
 prompt:prompt,
 
 format:"jpg"
-
 
 })
 
 
 }
 
-
 );
-
-
-
-
-
-if(!response.ok){
-
-
-throw new Error(
-"Erreur modification image"
-);
-
-
-}
-
-
 
 
 
@@ -731,10 +630,17 @@ await response.blob();
 
 
 
+if(!blob.type.includes("image")){
+
+throw new Error(
+"Image invalide"
+);
+
+}
+
 
 
 return URL.createObjectURL(blob);
-
 
 
 }
@@ -746,8 +652,7 @@ return URL.createObjectURL(blob);
 
 
 
-
-// =============== IMAGE BASE64 ===================
+// ================= IMAGE EN BASE64 =================
 
 
 function imageToBase64(file){
@@ -766,9 +671,11 @@ reader.onload=()=>{
 
 
 resolve(
-reader.result.split(",")[1]
-);
 
+reader.result
+.split(",")[1]
+
+);
 
 
 };
@@ -796,38 +703,38 @@ reader.readAsDataURL(file);
 
 
 
+// ================= DETECTION IMAGE =================
 
-// =============== DETECTION IMAGE ===============
 
 
 function isImageRequest(text){
 
 
 
-const keywords=[
+const words=[
 
-
-"génère",
-
-"genere",
-
-"crée",
-
-"cree",
-
-"dessine",
 
 "image",
 
 "photo",
 
+"dessine",
+
+"crée",
+
+"cree",
+
+"génère",
+
+"genere",
+
+"logo",
+
 "portrait",
 
 "paysage",
 
-"logo",
-
-"generate",
+"draw",
 
 "create"
 
@@ -836,20 +743,16 @@ const keywords=[
 
 
 
-
 text =
 text.toLowerCase();
 
 
 
+return words.some(
 
-return keywords.some(
-
-word =>
-text.includes(word)
+w=>text.includes(w)
 
 );
-
 
 
 }
@@ -861,12 +764,10 @@ text.includes(word)
 
 
 
-// =============== NETTOYER PROMPT IMAGE =========
-
+// ================= NETTOYAGE PROMPT =================
 
 
 function cleanPrompt(text){
-
 
 
 return text
@@ -879,15 +780,88 @@ return text
 .trim();
 
 
+}
+
+
+
+
+
+
+
+
+// ================= EFFET ECRITURE =================
+
+
+
+function typingEffect(element,text){
+
+
+
+let i=0;
+
+
+element.innerHTML="";
+
+
+
+let timer=setInterval(()=>{
+
+
+element.innerHTML += text[i];
+
+
+i++;
+
+
+if(i>=text.length){
+
+clearInterval(timer);
+
+}
+
+
+},35);
+
+
+}
+
+
+
+
+
+
+
+
+// ================= CHARGEMENT =================
+
+
+
+function loading(){
+
+
+
+const box =
+addMessage(
+
+"🤖 DAVBOT AI réfléchit...",
+"ai"
+
+);
+
+
+
+return box;
+
 
 }
 // ==========================================
 // DAVBOT AI APP.JS - PARTIE 3/3
-// ENVOI + AUDIO + VOIX + MEMOIRE
+// ENVOI + AUDIO + VOIX + ACTIONS
 // ==========================================
 
 
-// =============== ENVOYER MESSAGE =================
+
+// ================= ENVOYER MESSAGE =================
 
 
 async function send(){
@@ -904,6 +878,7 @@ return;
 
 
 
+// Message utilisateur
 
 if(text){
 
@@ -929,9 +904,10 @@ input.value="";
 
 
 
+try{
 
 
-// ===== IMAGE GENERATION =====
+// ===== CREATION IMAGE =====
 
 
 if(
@@ -940,10 +916,9 @@ isImageRequest(text)
 ){
 
 
-
-const loading =
+const wait =
 addMessage(
-"🎨 DAVBOT AI génère l'image...",
+"🎨 Création de l'image...",
 "ai"
 );
 
@@ -952,22 +927,27 @@ addMessage(
 try{
 
 
-const imageUrl =
+const image =
 await generateImage(
 cleanPrompt(text)
 );
 
 
 
-loading.remove();
+wait.remove();
 
 
 
 addMessage(
+
 "🎨 Image créée par DAVBOT AI",
+
 "ai",
+
 true,
-imageUrl
+
+image
+
 );
 
 
@@ -981,22 +961,19 @@ saveMessage(
 
 }
 
-catch(error){
+catch(e){
 
 
-loading.remove();
-
+wait.remove();
 
 
 addMessage(
-"❌ Impossible de créer l'image",
+"❌ Impossible de générer l'image",
 "ai"
 );
 
 
-
 }
-
 
 
 return;
@@ -1008,18 +985,12 @@ return;
 
 
 
-
-
 // ===== REPONSE IA =====
 
 
 
-const loading =
-addMessage(
-"✍️ DAVBOT AI écrit...",
-"ai"
-);
-
+const wait =
+loading();
 
 
 
@@ -1028,12 +999,11 @@ await getAIResponse(text);
 
 
 
-loading.remove();
+wait.remove();
 
 
 
-
-const aiBox =
+const ai =
 addMessage(
 "",
 "ai"
@@ -1041,14 +1011,12 @@ addMessage(
 
 
 
-const content =
-aiBox.querySelector(".content");
-
-
-
 typingEffect(
-content,
+
+ai.querySelector(".content"),
+
 reply
+
 );
 
 
@@ -1060,7 +1028,26 @@ reply
 
 
 
+// Lecture automatique
+
 speak(reply);
+
+
+
+}
+
+
+
+catch(error){
+
+
+addMessage(
+"❌ Erreur connexion",
+"ai"
+);
+
+
+}
 
 
 
@@ -1072,7 +1059,9 @@ speak(reply);
 
 
 
-// Bouton envoyer
+
+// ================= BOUTON ENVOI =================
+
 
 if(sendBtn){
 
@@ -1088,7 +1077,9 @@ send;
 // Entrée clavier
 
 input.addEventListener(
+
 "keypress",
+
 (e)=>{
 
 
@@ -1109,137 +1100,14 @@ send();
 
 
 
-// =============== LECTURE VOCALE =================
-
-
-
-function speak(text){
-
-
-const speech =
-new SpeechSynthesisUtterance(text);
-
-
-
-speech.lang =
-"fr-FR";
-
-
-speech.rate =
-1;
-
-
-
-speechSynthesis.cancel();
-
-
-
-speechSynthesis.speak(
-speech
-);
-
-
-
-}
-
-
-
-
-
-window.voiceMessage =
-function(btn){
-
-
-
-const text =
-btn
-.parentElement
-.parentElement
-.querySelector(".content")
-.innerText;
-
-
-
-speak(text);
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// =============== COPIER MESSAGE ================
-
-
-window.copyMessage =
-function(btn){
-
-
-
-const text =
-btn
-.parentElement
-.parentElement
-.querySelector(".content")
-.innerText;
-
-
-
-navigator.clipboard.writeText(text);
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// =============== SUPPRIMER MESSAGE =============
-
-
-
-window.deleteMessage =
-function(btn){
-
-
-
-btn
-.parentElement
-.parentElement
-.remove();
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// =============== ENVOI IMAGE ===================
+// ================= IMAGE UPLOAD =================
 
 
 
 if(imageBtn){
 
 
-imageBtn.onclick =
-()=>{
+imageBtn.onclick=()=>{
 
 
 imageInput.click();
@@ -1248,9 +1116,7 @@ imageInput.click();
 };
 
 
-
 }
-
 
 
 
@@ -1258,9 +1124,7 @@ imageInput.click();
 if(imageInput){
 
 
-
-imageInput.onchange =
-(e)=>{
+imageInput.onchange=(e)=>{
 
 
 const file =
@@ -1271,9 +1135,7 @@ e.target.files[0];
 if(file){
 
 
-pendingImage =
-file;
-
+pendingImage=file;
 
 
 pendingImagePreview =
@@ -1283,19 +1145,13 @@ URL.createObjectURL(file);
 
 addMessage(
 
-`
-📷 Image envoyée
+"📷 Image envoyée",
 
-<br>
+"user",
 
-<img 
-class="image-preview"
-src="${pendingImagePreview}"
->
+true,
 
-`,
-
-"user"
+pendingImagePreview
 
 );
 
@@ -1304,9 +1160,7 @@ src="${pendingImagePreview}"
 }
 
 
-
 };
-
 
 
 }
@@ -1319,8 +1173,126 @@ src="${pendingImagePreview}"
 
 
 
-// =============== RECONNAISSANCE VOCALE ==========
+// ================= TEXTE VERS VOIX =================
 
+
+function speak(text){
+
+
+
+const voice =
+new SpeechSynthesisUtterance(text);
+
+
+
+voice.lang="fr-FR";
+
+
+voice.rate=1;
+
+
+
+speechSynthesis.cancel();
+
+
+speechSynthesis.speak(voice);
+
+
+}
+
+
+
+
+window.voiceMessage=function(btn){
+
+
+
+const text =
+
+btn.parentElement
+.parentElement
+.querySelector(".content")
+.innerText;
+
+
+
+speak(text);
+
+
+};
+
+
+
+
+
+
+
+
+
+// ================= COPIER =================
+
+
+window.copyMessage=function(btn){
+
+
+
+const text =
+
+btn.parentElement
+.parentElement
+.querySelector(".content")
+.innerText;
+
+
+
+navigator.clipboard.writeText(text);
+
+
+
+btn.innerHTML="✅";
+
+
+setTimeout(()=>{
+
+btn.innerHTML="📋";
+
+},1000);
+
+
+};
+
+
+
+
+
+
+
+
+
+// ================= SUPPRIMER =================
+
+
+window.deleteMessage=function(btn){
+
+
+const msg =
+btn.parentElement.parentElement;
+
+
+msg.remove();
+
+
+};
+
+
+
+
+
+
+
+
+
+// ================= RECONNAISSANCE VOCALE =================
 
 
 let recognition;
@@ -1328,8 +1300,7 @@ let recognition;
 
 
 if(
-"webkitSpeechRecognition"
-in window
+"webkitSpeechRecognition" in window
 ){
 
 
@@ -1343,20 +1314,14 @@ recognition.lang =
 "fr-FR";
 
 
-
-recognition.continuous =
-false;
+recognition.continuous=false;
 
 
 
-
-recognition.onstart =
-()=>{
+recognition.onstart=()=>{
 
 
-audioBtn.innerHTML =
-"🎧";
-
+audioBtn.innerHTML="🎧";
 
 
 };
@@ -1365,39 +1330,33 @@ audioBtn.innerHTML =
 
 
 
-
-recognition.onresult =
-(event)=>{
+recognition.onresult=(event)=>{
 
 
 const text =
-event.results[0][0].transcript;
+
+event.results[0][0]
+.transcript;
 
 
 
-input.value =
-text;
+input.value=text;
 
 
 
 send();
 
 
-
 };
 
 
 
 
 
-
-recognition.onend =
-()=>{
+recognition.onend=()=>{
 
 
-audioBtn.innerHTML =
-"🎤";
-
+audioBtn.innerHTML="🎤";
 
 
 };
@@ -1411,8 +1370,7 @@ audioBtn.innerHTML =
 if(audioBtn){
 
 
-audioBtn.onclick =
-()=>{
+audioBtn.onclick=()=>{
 
 
 recognition.start();
@@ -1425,22 +1383,17 @@ recognition.start();
 
 
 
-
-
-}
-
-else{
+}else{
 
 
 if(audioBtn){
 
 
-audioBtn.onclick =
-()=>{
+audioBtn.onclick=()=>{
 
 
 alert(
-"Reconnaissance vocale non disponible"
+"Micro non disponible"
 );
 
 
@@ -1450,7 +1403,6 @@ alert(
 }
 
 
-
 }
 
 
@@ -1459,56 +1411,38 @@ alert(
 
 
 
+// ================= NOUVELLE DISCUSSION =================
 
 
-// =============== CHARGER MEMOIRE FIREBASE ========
+function newChat(){
+
+
+sessionId =
+Date.now().toString();
 
 
 
-onValue(
-
-ref(
-db,
-`davbot/${sessionId}/messages`
-),
-
-(snapshot)=>{
-
-
-if(
-snapshot.exists()
-){
+localStorage.setItem(
+"davbot_chat",
+sessionId
+);
 
 
 
 messages.innerHTML="";
 
 
-
-Object.values(
-snapshot.val()
-)
-
-.sort(
-(a,b)=>a.date-b.date
-)
-
-.forEach(
-(msg)=>{
-
-
 addMessage(
-msg.text,
-msg.role
+
+"Bonjour 👋 Je suis DAVBOT AI. Nouvelle discussion créée.",
+
+"ai"
+
 );
-
-
-
-});
 
 
 }
 
 
 
-});
+window.newChat=newChat;

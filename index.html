@@ -1,588 +1,1273 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>DAVBOT AI</title>
 
+
 <style>
 
+/* ==================================================
+   DAVBOT AI CHATGPT STYLE
+   PARTIE 1/3
+================================================== */
+
+
 *{
+
     margin:0;
     padding:0;
     box-sizing:border-box;
+
 }
+
 
 :root{
+
     --bg:#050816;
+
     --panel:#0b1224;
+
     --panel2:#101a32;
-    --border:rgba(255,255,255,.08);
+
     --blue:#00d2ff;
+
     --blue2:#0066ff;
+
     --text:#f5f7ff;
-    --muted:#8791aa;
+
+    --muted:#8894ad;
+
+    --border:
+    rgba(255,255,255,.08);
+
 }
+
+
 
 body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:var(--bg);
-    color:var(--text);
+
+    width:100%;
+
     height:100vh;
+
     overflow:hidden;
+
+    background:var(--bg);
+
+    color:white;
+
+    font-family:
+
+    Arial,
+
+    Helvetica,
+
+    sans-serif;
+
 }
 
-button,
-textarea{
-    font-family:inherit;
-}
+
+
+/* ================================
+   APP
+================================ */
+
 
 .app{
+
+    display:flex;
+
     height:100vh;
-    display:flex;
-    flex-direction:column;
+
 }
 
-/* HEADER */
 
-.header{
-    height:65px;
-    flex-shrink:0;
 
-    display:flex;
-    align-items:center;
+/* ================================
+   SIDEBAR
+================================ */
 
-    padding:0 15px;
 
-    background:#080d1d;
+.sidebar{
 
-    border-bottom:1px solid var(--border);
+    width:280px;
 
-    z-index:10;
-}
-
-.logo{
-    display:flex;
-    align-items:center;
-    gap:10px;
-
-    font-size:18px;
-    font-weight:bold;
-}
-
-.logo-icon{
-    width:40px;
-    height:40px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border-radius:13px;
+    height:100vh;
 
     background:
-        linear-gradient(
-            135deg,
-            var(--blue),
-            var(--blue2)
-        );
+
+    linear-gradient(
+    180deg,
+    #080d1c,
+    #050816
+    );
+
+
+    border-right:
+
+    1px solid var(--border);
+
+
+    padding:15px;
+
+
+    display:flex;
+
+    flex-direction:column;
+
+
+}
+
+
+
+/* LOGO */
+
+
+.brand{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:20px;
+
+}
+
+
+
+.logo{
+
+    width:48px;
+
+    height:48px;
+
+
+    border-radius:16px;
+
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+
+    font-size:25px;
+
+
+    background:
+
+    linear-gradient(
+    135deg,
+    var(--blue),
+    var(--blue2)
+    );
+
 
     box-shadow:
-        0 0 25px
-        rgba(0,210,255,.3);
+
+    0 0 30px
+    rgba(0,210,255,.4);
+
+
+}
+
+
+
+.brand h2{
 
     font-size:20px;
+
 }
 
-.logo span{
+
+
+.brand h2 span{
+
     color:var(--blue);
+
 }
 
-.online{
-    margin-left:auto;
 
-    color:#55ff9a;
+
+.brand p{
+
+    color:var(--muted);
 
     font-size:12px;
+
 }
 
-.online::before{
-    content:"●";
-    margin-right:5px;
-}
 
-/* NEW CHAT */
+
+/* NOUVEAU CHAT */
+
 
 .new-chat{
-    position:fixed;
 
-    top:74px;
-    right:12px;
 
-    z-index:20;
+    width:100%;
 
-    padding:9px 12px;
 
-    border:1px solid var(--border);
+    padding:13px;
 
-    border-radius:12px;
 
-    background:var(--panel2);
+    border-radius:14px;
 
-    color:#cbd4e9;
+
+    border:
+
+    1px solid var(--border);
+
+
+    background:
+
+    var(--panel2);
+
+
+    color:white;
+
 
     cursor:pointer;
 
-    font-size:12px;
+
+    font-size:14px;
+
+
+    transition:.2s;
+
+
 }
+
+
 
 .new-chat:hover{
+
     background:#172442;
+
+    transform:translateY(-2px);
+
 }
 
-/* CHAT */
 
-.chat{
+
+/* MENU */
+
+
+.menu{
+
+    margin-top:20px;
+
+}
+
+
+
+.menu a{
+
+
+    display:block;
+
+
+    padding:12px;
+
+
+    margin-bottom:6px;
+
+
+    border-radius:12px;
+
+
+    color:#cbd5e1;
+
+
+    text-decoration:none;
+
+
+    transition:.2s;
+
+
+}
+
+
+
+.menu a:hover{
+
+    background:#111a32;
+
+    color:white;
+
+}
+
+
+
+/* TITRE */
+
+
+.sidebar h4{
+
+    margin-top:20px;
+
+    color:#64708a;
+
+    font-size:12px;
+
+    text-transform:uppercase;
+
+}
+
+
+
+/* HISTORIQUE */
+
+
+.history{
+
     flex:1;
 
-    width:100%;
-    max-width:900px;
+    overflow-y:auto;
 
-    margin:auto;
+    margin-top:10px;
+
+
+}
+
+
+
+.history-item{
+
+
+    padding:10px;
+
+
+    border-radius:10px;
+
+
+    color:#b9c3d8;
+
+
+    cursor:pointer;
+
+
+    font-size:13px;
+
+
+    margin-bottom:5px;
+
+
+}
+
+
+
+.history-item:hover{
+
+    background:#111a32;
+
+}
+
+
+
+/* PROFIL */
+
+
+.profile{
+
+
+    display:flex;
+
+    align-items:center;
+
+
+    gap:10px;
+
+
+    padding:12px;
+
+
+    background:#10182d;
+
+
+    border-radius:15px;
+
+
+}
+
+
+
+.avatar{
+
+
+    width:40px;
+
+    height:40px;
+
+
+    display:flex;
+
+
+    justify-content:center;
+
+
+    align-items:center;
+
+
+    border-radius:12px;
+
+
+    background:#17233e;
+
+
+}
+
+
+
+.profile strong{
+
+    font-size:14px;
+
+}
+
+
+
+.profile p{
+
+    color:var(--muted);
+
+    font-size:12px;
+
+}
+
+
+
+/* ================================
+   MAIN
+================================ */
+
+
+.main{
+
+    flex:1;
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+}
+
+
+
+/* HEADER */
+
+
+.topbar{
+
+
+    height:65px;
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    justify-content:space-between;
+
+
+    padding:0 20px;
+
+
+    background:#050816;
+
+
+    border-bottom:
+
+    1px solid var(--border);
+
+
+}
+
+
+
+.topbar h3{
+
+    font-size:18px;
+
+}
+
+
+
+#menuBtn{
+
+
+    display:none;
+
+
+    background:none;
+
+
+    border:none;
+
+
+    color:white;
+
+
+    font-size:25px;
+
+
+}
+
+
+
+.online{
+
+
+    color:#4dff91;
+
+
+    font-size:13px;
+
+
+}
+/* ================================
+   ZONE CHAT
+================================ */
+
+
+.chat{
+
+    flex:1;
 
     overflow-y:auto;
 
     padding:
-        25px
-        12px
-        145px;
+
+    30px 25px 130px;
+
+
+    scroll-behavior:smooth;
+
+
 }
+
+
 
 .chat::-webkit-scrollbar{
+
     width:5px;
+
 }
+
 
 .chat::-webkit-scrollbar-thumb{
+
     background:#172442;
+
     border-radius:20px;
+
 }
 
-/* WELCOME */
+
+
+/* ================================
+   BIENVENUE
+================================ */
+
 
 .welcome{
-    min-height:55vh;
+
+
+    height:70%;
+
 
     display:flex;
+
+
     flex-direction:column;
 
+
     justify-content:center;
+
+
     align-items:center;
+
 
     text-align:center;
+
+
 }
 
-.welcome-icon{
-    width:80px;
-    height:80px;
+
+
+.ai-logo{
+
+
+    width:90px;
+
+    height:90px;
+
+
+    border-radius:30px;
+
 
     display:flex;
-    align-items:center;
+
+
     justify-content:center;
 
-    border-radius:25px;
+
+    align-items:center;
+
+
+    font-size:42px;
+
+
 
     background:
-        linear-gradient(
-            135deg,
-            var(--blue),
-            var(--blue2)
-        );
+
+    linear-gradient(
+    135deg,
+    var(--blue),
+    var(--blue2)
+    );
+
 
     box-shadow:
-        0 0 45px
-        rgba(0,210,255,.3);
 
-    font-size:36px;
+    0 0 50px
+    rgba(0,210,255,.35);
 
-    margin-bottom:20px;
+
 }
+
+
 
 .welcome h1{
-    font-size:29px;
 
-    margin-bottom:10px;
+
+    margin-top:25px;
+
+
+    font-size:32px;
+
+
 }
+
+
 
 .welcome h1 span{
+
+
     color:var(--blue);
+
+
 }
+
+
 
 .welcome p{
+
+
+    margin-top:10px;
+
+
     color:var(--muted);
 
-    font-size:14px;
+
+    max-width:400px;
+
+
 }
 
+
+
+/* SUGGESTIONS */
+
+
 .suggestions{
+
+
+    margin-top:25px;
+
+
     display:flex;
+
+
+    gap:10px;
+
 
     flex-wrap:wrap;
 
+
     justify-content:center;
 
-    gap:8px;
 
-    margin-top:22px;
 }
 
-.suggestion{
-    padding:10px 13px;
 
-    border:1px solid var(--border);
 
-    border-radius:13px;
+.suggestions button{
 
-    background:#0c152b;
 
-    color:#b9c3d8;
+    padding:11px 16px;
+
+
+    border-radius:15px;
+
+
+    background:#101a32;
+
+
+    color:#d8e2f5;
+
+
+    border:
+
+    1px solid var(--border);
+
 
     cursor:pointer;
 
-    font-size:12px;
 
     transition:.2s;
+
+
 }
 
-.suggestion:hover{
-    color:white;
+
+
+.suggestions button:hover{
+
 
     border-color:var(--blue);
 
+
     transform:translateY(-2px);
+
+
 }
 
-/* MESSAGE */
+
+
+/* ================================
+   MESSAGES
+================================ */
+
 
 .message{
+
+
     display:flex;
 
-    gap:9px;
 
-    margin:18px 0;
+    gap:10px;
+
+
+    margin:20px 0;
+
 
     animation:
-        messageIn
-        .2s
-        ease;
-}
 
-@keyframes messageIn{
+    showMessage .25s ease;
 
-    from{
-        opacity:0;
-        transform:translateY(7px);
-    }
-
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
 
 }
+
+
+
+@keyframes showMessage{
+
+
+from{
+
+    opacity:0;
+
+    transform:translateY(10px);
+
+}
+
+
+to{
+
+    opacity:1;
+
+    transform:translateY(0);
+
+}
+
+
+}
+
+
 
 .message.user{
+
+
     justify-content:flex-end;
+
+
 }
 
-.avatar{
-    width:35px;
-    height:35px;
 
-    min-width:35px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border-radius:11px;
-
-    background:#111b33;
-
-    font-size:16px;
-}
 
 .message.user .avatar{
+
+
     order:2;
 
+
     background:
-        linear-gradient(
-            135deg,
-            var(--blue2),
-            var(--blue)
-        );
+
+    linear-gradient(
+    135deg,
+    var(--blue2),
+    var(--blue)
+    );
+
+
 }
 
+
+
 .bubble{
-    max-width:80%;
 
-    padding:13px 15px;
 
-    border-radius:17px;
+    max-width:75%;
 
-    background:#0d162b;
 
-    border:1px solid var(--border);
+    padding:14px 16px;
 
-    color:#eef2ff;
 
-    font-size:14px;
+    background:#101a32;
+
+
+    border-radius:18px;
+
 
     line-height:1.6;
 
+
+    font-size:14px;
+
+
+    color:#f1f5ff;
+
+
+    border:
+
+    1px solid var(--border);
+
+
     white-space:pre-wrap;
 
-    overflow-wrap:anywhere;
+
 }
 
+
+
 .message.user .bubble{
+
+
     background:
-        linear-gradient(
-            135deg,
-            #075cff,
-            #008dff
-        );
+
+    linear-gradient(
+    135deg,
+    #0066ff,
+    #00aaff
+    );
+
 
     border:none;
 
-    border-bottom-right-radius:5px;
-}
-
-.message.assistant .bubble{
-    border-bottom-left-radius:5px;
-}
-
-/* TYPING */
-
-.typing{
-    display:flex;
-
-    align-items:center;
-
-    gap:5px;
-
-    height:18px;
-}
-
-.typing span{
-    width:6px;
-    height:6px;
-
-    border-radius:50%;
-
-    background:var(--blue);
-
-    animation:
-        typing 1s infinite;
-}
-
-.typing span:nth-child(2){
-    animation-delay:.15s;
-}
-
-.typing span:nth-child(3){
-    animation-delay:.3s;
-}
-
-@keyframes typing{
-
-    0%,100%{
-        opacity:.2;
-        transform:translateY(0);
-    }
-
-    50%{
-        opacity:1;
-        transform:translateY(-4px);
-    }
 
 }
 
-/* INPUT */
+
+
+/* ================================
+   INPUT
+================================ */
+
 
 .input-area{
+
+
     position:fixed;
 
-    left:0;
-    right:0;
+
     bottom:0;
 
-    padding:
-        10px
-        12px
-        18px;
+
+    left:280px;
+
+
+    right:0;
+
+
+    padding:15px;
+
 
     background:
-        linear-gradient(
-            transparent,
-            var(--bg) 30%
-        );
 
-    z-index:10;
+    linear-gradient(
+    transparent,
+    #050816 35%
+    );
+
+
 }
 
+
+
 .input-box{
+
+
     max-width:900px;
+
 
     margin:auto;
 
+
     display:flex;
+
 
     align-items:flex-end;
 
-    gap:8px;
 
-    padding:8px;
+    gap:10px;
 
-    background:#0b1428;
 
-    border:1px solid var(--border);
+    padding:10px;
 
-    border-radius:20px;
 
-    box-shadow:
-        0 10px 40px
-        rgba(0,0,0,.45);
+    background:#10182d;
+
+
+    border-radius:22px;
+
+
+    border:
+
+    1px solid var(--border);
+
+
 }
 
-.input-box:focus-within{
-    border-color:
-        rgba(0,210,255,.4);
-}
+
 
 textarea{
+
+
     flex:1;
 
-    min-height:42px;
+
+    height:45px;
+
 
     max-height:120px;
 
+
     resize:none;
 
-    border:0;
 
-    outline:0;
+    background:none;
 
-    background:transparent;
+
+    border:none;
+
+
+    outline:none;
+
 
     color:white;
 
-    padding:
-        11px
-        9px;
+
+    padding:12px;
+
 
     font-size:14px;
+
+
+    font-family:inherit;
+
+
 }
+
+
 
 textarea::placeholder{
-    color:#68738c;
+
+
+    color:#65718b;
+
+
 }
 
-.send{
-    width:43px;
-    height:43px;
 
-    min-width:43px;
 
-    border:0;
+#sendButton{
 
-    border-radius:14px;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--blue),
-            var(--blue2)
-        );
+    width:45px;
 
-    color:white;
 
-    font-size:18px;
+    height:45px;
+
+
+    border:none;
+
+
+    border-radius:15px;
+
 
     cursor:pointer;
 
+
+    color:white;
+
+
+    font-size:18px;
+
+
+    background:
+
+    linear-gradient(
+    135deg,
+    var(--blue),
+    var(--blue2)
+    );
+
+
     transition:.2s;
+
+
 }
 
-.send:hover{
+
+
+#sendButton:hover{
+
+
     transform:scale(1.05);
 
+
     box-shadow:
-        0 0 20px
-        rgba(0,210,255,.3);
+
+    0 0 20px
+    rgba(0,210,255,.4);
+
+
 }
+/* ================================
+   MOBILE RESPONSIVE
+================================ */
 
-.send:disabled{
-    opacity:.4;
 
-    cursor:not-allowed;
+@media(max-width:700px){
 
-    transform:none;
-}
 
-.footer{
-    text-align:center;
+.sidebar{
 
-    color:#46516a;
+    position:fixed;
 
-    font-size:10px;
+    left:-300px;
 
-    margin-top:7px;
-}
+    top:0;
 
-/* MOBILE */
+    z-index:20;
 
-@media(max-width:600px){
-
-    .header{
-        padding:0 12px;
-    }
-
-    .logo{
-        font-size:16px;
-    }
-
-    .online{
-        display:none;
-    }
-
-    .chat{
-        padding:
-            25px
-            10px
-            140px;
-    }
-
-    .welcome h1{
-        font-size:24px;
-    }
-
-    .welcome-icon{
-        width:70px;
-        height:70px;
-
-        font-size:31px;
-    }
-
-    .bubble{
-        max-width:88%;
-
-        font-size:13px;
-    }
+    transition:.3s;
 
 }
 
+
+.sidebar.active{
+
+    left:0;
+
+}
+
+
+
+#menuBtn{
+
+    display:block;
+
+}
+
+
+
+.input-area{
+
+    left:0;
+
+}
+
+
+
+.chat{
+
+    padding:
+
+    20px 12px 120px;
+
+}
+
+
+
+.welcome h1{
+
+    font-size:25px;
+
+}
+
+
+
+.ai-logo{
+
+    width:75px;
+
+    height:75px;
+
+    font-size:35px;
+
+}
+
+
+
+.bubble{
+
+    max-width:85%;
+
+    font-size:13px;
+
+}
+
+
+
+.suggestions button{
+
+    font-size:12px;
+
+}
+
+
+}
+
+
+
+
+/* ================================
+   TYPING IA
+================================ */
+
+
+.typing{
+
+    display:flex;
+
+    gap:5px;
+
+}
+
+
+
+.typing span{
+
+    width:7px;
+
+    height:7px;
+
+    background:var(--blue);
+
+    border-radius:50%;
+
+    animation:
+
+    typing 1s infinite;
+
+}
+
+
+
+.typing span:nth-child(2){
+
+    animation-delay:.2s;
+
+}
+
+
+
+.typing span:nth-child(3){
+
+    animation-delay:.4s;
+
+}
+
+
+
+@keyframes typing{
+
+
+0%,100%{
+
+    opacity:.3;
+
+    transform:translateY(0);
+
+}
+
+
+
+50%{
+
+    opacity:1;
+
+    transform:translateY(-5px);
+
+}
+
+
+}
+
+
+@media(max-width:700px){
+
+.sidebar{
+
+    position:fixed;
+
+    left:-300px;
+
+    top:0;
+
+    bottom:0;
+
+    transition:.3s ease;
+
+}
+
+
+.sidebar.active{
+
+    left:0;
+
+    box-shadow:
+    0 0 40px rgba(0,0,0,.6);
+
+}
+
+}
 </style>
 
 </head>
@@ -594,631 +1279,394 @@ textarea::placeholder{
 <div class="app">
 
 
-<!-- HEADER -->
 
-<header class="header">
-
-    <div class="logo">
-
-        <div class="logo-icon">
-            🤖
-        </div>
-
-        DAVBOT <span>AI</span>
-
-    </div>
+<!-- ================= SIDEBAR ================= -->
 
 
-    <div class="online">
-        IA en ligne
-    </div>
+<aside class="sidebar" id="sidebar">
+
+
+<div class="brand">
+
+
+<div class="logo">
+
+🤖
+
+</div>
+
+
+<div>
+
+
+<h2>
+
+DAVBOT <span>AI</span>
+
+</h2>
+
+
+<p>
+
+Assistant intelligent
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<button class="new-chat" id="newChat">
+
+＋ Nouvelle discussion
+
+</button>
+
+
+
+
+
+<nav class="menu">
+
+
+<a href="index.html">
+
+💬 Chat
+
+</a>
+
+
+<a href="projet.html">
+
+🚀 Projet
+
+</a>
+
+
+</nav>
+
+
+
+
+
+<h4>
+
+Historique
+
+</h4>
+
+
+
+<div class="history" id="historyList">
+
+</div>
+
+
+
+
+
+
+<div class="profile">
+
+
+<div class="avatar">
+
+👤
+
+</div>
+
+
+
+<div>
+
+
+<strong id="userName">
+
+Utilisateur
+
+</strong>
+
+
+<p>
+
+DAVBOT AI
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+</aside>
+
+
+
+
+
+
+
+<!-- ================= MAIN ================= -->
+
+
+<main class="main">
+
+
+
+<header class="topbar">
+
+
+<button id="menuBtn">
+
+☰
+
+</button>
+
+
+
+<h3>
+
+DAVBOT AI
+
+</h3>
+
+
+
+<div class="online">
+
+🟢 Gemini
+
+</div>
+
 
 </header>
 
 
-<!-- NEW CHAT -->
 
-<button
-    class="new-chat"
-    id="newChat"
->
-    ＋ Nouvelle discussion
+
+
+
+
+<section class="chat" id="chat">
+
+
+
+<div class="welcome" id="welcome">
+
+
+<div class="ai-logo">
+
+🤖
+
+</div>
+
+
+
+<h1>
+
+Bienvenue sur
+
+<span>
+
+DAVBOT AI
+
+</span>
+
+</h1>
+
+
+
+<p>
+
+Ton assistant IA pour créer,
+coder et développer tes projets.
+
+</p>
+
+
+
+
+<div class="suggestions">
+
+
+<button data-msg="Explique moi l'intelligence artificielle">
+
+🤖 Intelligence artificielle
+
 </button>
 
 
-<!-- CHAT -->
 
-<main
-    class="chat"
-    id="chat"
->
+<button data-msg="Crée une idée de projet">
 
+🚀 Projet
 
-<section
-    class="welcome"
-    id="welcome"
->
-
-    <div class="welcome-icon">
-        🤖
-    </div>
+</button>
 
 
-    <h1>
-        Bienvenue sur
-        <span>DAVBOT AI</span>
-    </h1>
+
+<button data-msg="Aide moi à programmer">
+
+💻 Programmation
+
+</button>
 
 
-    <p>
-        Pose-moi une question et commençons la discussion.
-    </p>
+</div>
 
 
-    <div class="suggestions">
+</div>
 
 
-        <button
-            class="suggestion"
-            data-message="Bonjour DAVBOT AI"
-        >
-            👋 Bonjour
-        </button>
-
-
-        <button
-            class="suggestion"
-            data-message="Explique-moi ce qu'est l'intelligence artificielle."
-        >
-            🤖 Intelligence artificielle
-        </button>
-
-
-        <button
-            class="suggestion"
-            data-message="Donne-moi une idée de projet web."
-        >
-            💻 Projet web
-        </button>
-
-
-        <button
-            class="suggestion"
-            data-message="Écris-moi un petit code JavaScript."
-        >
-            🧑‍💻 JavaScript
-        </button>
-
-
-    </div>
 
 </section>
+
+
+
+
+
+
+
+
+<footer class="input-area">
+
+
+<div class="input-box">
+
+
+
+<textarea
+
+id="messageInput"
+
+placeholder="Écris un message à DAVBOT..."
+
+></textarea>
+
+
+
+
+<button id="sendButton">
+
+➤
+
+</button>
+
+
+
+</div>
+
+
+
+</footer>
+
+
+
+
 
 
 </main>
 
 
-<!-- INPUT -->
-
-<div class="input-area">
-
-    <div class="input-box">
-
-
-        <textarea
-            id="messageInput"
-            rows="1"
-            placeholder="Écris ton message..."
-        ></textarea>
-
-
-        <button
-            class="send"
-            id="sendButton"
-        >
-            ➤
-        </button>
-
-
-    </div>
-
-
-    <div class="footer">
-        DAVBOT AI • Powered by Doki API
-    </div>
 
 </div>
 
 
-</div>
+
+
+
+
+<script src="app.js"></script>
+
 
 
 <script>
 
-/* =========================================
-   DAVBOT AI
-   DOKI API
-========================================= */
+/* ==============================
+   MENU MOBILE DAVBOT AI
+============================== */
 
+const menuBtn = 
+document.getElementById("menuBtn");
 
-const API_URL =
-    "https://doki-api.vercel.app/api/doki";
 
+const sidebar = 
+document.getElementById("sidebar");
 
-const chat =
-    document.getElementById(
-        "chat"
-    );
 
-const input =
-    document.getElementById(
-        "messageInput"
-    );
 
-const sendButton =
-    document.getElementById(
-        "sendButton"
-    );
+if(menuBtn && sidebar){
 
-const newChat =
-    document.getElementById(
-        "newChat"
-    );
 
-const welcome =
-    document.getElementById(
-        "welcome"
-    );
+    // Ouvrir / fermer avec le bouton
 
+    menuBtn.onclick = function(e){
 
-/* =========================================
-   AJOUT MESSAGE
-========================================= */
+        e.stopPropagation();
 
-function addMessage(
-    text,
-    user
-){
+        sidebar.classList.toggle("active");
 
-    const message =
-        document.createElement(
-            "div"
-        );
+    };
 
-    message.className =
-        "message " +
-        (
-            user
-            ? "user"
-            : "assistant"
-        );
 
 
-    const avatar =
-        document.createElement(
-            "div"
-        );
+    // Fermer en cliquant dans le chat
 
-    avatar.className =
-        "avatar";
-
-    avatar.textContent =
-        user
-        ? "👤"
-        : "🤖";
-
-
-    const bubble =
-        document.createElement(
-            "div"
-        );
-
-    bubble.className =
-        "bubble";
-
-    bubble.textContent =
-        String(text);
-
-
-    message.appendChild(
-        avatar
-    );
-
-    message.appendChild(
-        bubble
-    );
-
-    chat.appendChild(
-        message
-    );
-
-
-    chat.scrollTop =
-        chat.scrollHeight;
-
-
-    welcome.style.display =
-        "none";
-
-}
-
-
-/* =========================================
-   TYPING
-========================================= */
-
-function showTyping(){
-
-    const message =
-        document.createElement(
-            "div"
-        );
-
-    message.id =
-        "typingMessage";
-
-    message.className =
-        "message assistant";
-
-
-    message.innerHTML = `
-
-        <div class="avatar">
-            🤖
-        </div>
-
-        <div class="bubble">
-
-            <div class="typing">
-
-                <span></span>
-                <span></span>
-                <span></span>
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    chat.appendChild(
-        message
-    );
-
-
-    chat.scrollTop =
-        chat.scrollHeight;
-
-}
-
-
-function removeTyping(){
-
-    const typing =
-        document.getElementById(
-            "typingMessage"
-        );
-
-    if(typing){
-
-        typing.remove();
-
-    }
-
-}
-
-
-/* =========================================
-   DOKI API
-========================================= */
-
-async function getDokiResponse(
-    message
-){
-
-    const response =
-        await fetch(
-            API_URL,
-            {
-
-                method:
-                    "POST",
-
-                headers:{
-                    "Content-Type":
-                        "application/json"
-                },
-
-                body:
-                    JSON.stringify({
-                        message:
-                            message
-                    })
-
-            }
-        );
-
-
-    if(!response.ok){
-
-        throw new Error(
-            "HTTP " +
-            response.status
-        );
-
-    }
-
-
-    const data =
-        await response.json();
-
-
-    console.log(
-        "DOKI RESPONSE:",
-        data
-    );
-
-
-    if(
-        typeof data ===
-        "string"
-    ){
-
-        return data;
-
-    }
-
-
-    return (
-
-        data.response ||
-
-        data.reply ||
-
-        data.answer ||
-
-        data.message ||
-
-        data.text ||
-
-        data.result ||
-
-        data.content ||
-
-        JSON.stringify(data)
-
-    );
-
-}
-
-
-/* =========================================
-   ENVOYER MESSAGE
-========================================= */
-
-async function sendMessage(){
-
-    const text =
-        input.value.trim();
-
-
-    if(!text){
-
-        return;
-
-    }
-
-
-    if(
-        sendButton.disabled
-    ){
-
-        return;
-
-    }
-
-
-    /* USER */
-
-    addMessage(
-        text,
-        true
-    );
-
-
-    /* RESET */
-
-    input.value =
-        "";
-
-    input.style.height =
-        "42px";
-
-
-    sendButton.disabled =
-        true;
-
-
-    /* TYPING */
-
-    showTyping();
-
-
-    try{
-
-
-        const answer =
-            await getDokiResponse(
-                text
-            );
-
-
-        removeTyping();
-
-
-        addMessage(
-            answer,
-            false
-        );
-
-
-    }catch(error){
-
-
-        console.error(
-            "DAVBOT ERROR:",
-            error
-        );
-
-
-        removeTyping();
-
-
-        addMessage(
-            "❌ Impossible de contacter Doki API.\n\nVérifie ta connexion ou le blocage CORS de TrebEdit.",
-            false
-        );
-
-
-    }
-
-
-    sendButton.disabled =
-        false;
-
-
-    input.focus();
-
-}
-
-
-/* =========================================
-   BOUTON ENVOYER
-========================================= */
-
-sendButton.addEventListener(
+    document.addEventListener(
     "click",
-    sendMessage
-);
+    function(e){
 
-
-/* =========================================
-   ENTER
-========================================= */
-
-input.addEventListener(
-    "keydown",
-    function(event){
 
         if(
-            event.key === "Enter" &&
-            !event.shiftKey
+            !sidebar.contains(e.target)
+            &&
+            !menuBtn.contains(e.target)
         ){
 
-            event.preventDefault();
-
-            sendMessage();
+            sidebar.classList.remove(
+                "active"
+            );
 
         }
 
-    }
-);
+
+    });
 
 
-/* =========================================
-   AUTO RESIZE
-========================================= */
 
-input.addEventListener(
-    "input",
-    function(){
+    // Fermer après clic sur un lien
 
-        this.style.height =
-            "42px";
-
-        this.style.height =
-            Math.min(
-                this.scrollHeight,
-                120
-            ) + "px";
-
-    }
-);
+    document
+    .querySelectorAll(".menu a")
+    .forEach(link=>{
 
 
-/* =========================================
-   NOUVELLE DISCUSSION
-========================================= */
+        link.onclick=function(){
 
-newChat.addEventListener(
-    "click",
-    function(){
+            sidebar.classList.remove(
+                "active"
+            );
 
-        chat.innerHTML =
-            "";
-
-        chat.appendChild(
-            welcome
-        );
-
-        welcome.style.display =
-            "flex";
-
-        input.value =
-            "";
-
-        input.style.height =
-            "42px";
-
-        input.focus();
-
-    }
-);
+        };
 
 
-/* =========================================
-   SUGGESTIONS
-========================================= */
-
-document
-.querySelectorAll(
-    ".suggestion"
-)
-.forEach(
-    function(button){
-
-        button.addEventListener(
-            "click",
-            function(){
-
-                input.value =
-                    this.dataset.message;
-
-                sendMessage();
-
-            }
-        );
-
-    }
-);
+    });
 
 
-/* =========================================
-   START
-========================================= */
+}
 
-console.log(
-    "🤖 DAVBOT AI lancé"
-);
-
-console.log(
-    "Doki API :",
-    API_URL
-);
 
 </script>
 
 
 </body>
+
 </html>

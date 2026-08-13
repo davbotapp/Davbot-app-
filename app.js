@@ -1,177 +1,652 @@
-// ==========================================
-// DAVBOT AI APP.JS - PARTIE 1/3
-// Firebase + Mémoire + Interface
-// ==========================================
+/* =====================================================
+   DAVBOT AI APP.JS
+   PARTIE 1/3
+   Gemini + Memory + Chat + Projects
+===================================================== */
 
 
-// ================= API =================
-
-const GEM_API =
-"https://christus-gem-api.onrender.com";
-
-
-const COPILOT_API =
-"https://celestin-api.onrender.com/api/v1/copilot";
+/* ==============================
+   CONFIG GEMINI 
+============================== */
 
 
-
-// ================= FIREBASE =================
-
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+const GEMINI_KEY =
+"AQ.Ab8RN6LaOsrcv3vAUKRPpN6ObXziP-TDaLMhxUglMKVPhwPauA";
 
 
-import {
-getDatabase,
-ref,
-push,
-set,
-onValue,
-remove,
-get
+const GEMINI_URL =
+"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
+
+
+
+/* ==============================
+   STORAGE
+============================== */
+
+
+let userName =
+localStorage.getItem(
+"davbot_name"
+);
+
+
+
+let conversations =
+JSON.parse(
+localStorage.getItem(
+"davbot_history"
+) || "[]"
+);
+
+
+
+let projects =
+JSON.parse(
+localStorage.getItem(
+"davbot_projects"
+) || "[]"
+);
+
+
+
+let currentChat = [];
+
+
+
+
+
+/* ==============================
+   UTILITAIRE
+============================== */
+
+
+function saveData(){
+
+localStorage.setItem(
+"davbot_history",
+JSON.stringify(conversations)
+);
+
+
+localStorage.setItem(
+"davbot_projects",
+JSON.stringify(projects)
+);
+
 }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 
 
-const firebaseConfig = {
 
-apiKey:
-"AIzaSyA24pBo8mBWiZssPtep--MMBdB7c8_Lu4U",
 
-authDomain:
-"starlink-investit.firebaseapp.com",
+/* ==============================
+   UTILISATEUR
+============================== */
 
-databaseURL:
-"https://starlink-investit-default-rtdb.firebaseio.com",
 
-projectId:
-"starlink-investit"
+function checkUser(){
+
+
+if(!userName){
+
+
+userName =
+prompt(
+"👋 Bonjour\nJe suis DAVBOT AI.\nQuel est ton nom ?"
+);
+
+
+
+if(!userName || userName.trim()===""){
+
+userName="Utilisateur";
+
+}
+
+
+localStorage.setItem(
+"davbot_name",
+userName
+);
+
+
+}
+
+
+
+document
+.querySelectorAll("#userName")
+.forEach(el=>{
+
+el.textContent=userName;
+
+});
+
+
+}
+
+
+
+checkUser();
+
+
+
+
+
+
+/* ==============================
+   ELEMENTS
+============================== */
+
+
+const chat =
+document.getElementById(
+"chat"
+);
+
+
+
+const input =
+document.getElementById(
+"messageInput"
+);
+
+
+
+const sendButton =
+document.getElementById(
+"sendButton"
+);
+
+
+
+const welcome =
+document.getElementById(
+"welcome"
+);
+
+
+
+const historyList =
+document.getElementById(
+"historyList"
+);
+
+
+
+const projectList =
+document.getElementById(
+"projectList"
+);
+
+
+
+
+
+
+/* ==============================
+   MESSAGE
+============================== */
+
+
+function addMessage(
+text,
+role="assistant",
+save=true
+){
+
+
+if(!chat)return;
+
+
+
+if(welcome){
+
+welcome.style.display="none";
+
+}
+
+
+
+const box =
+document.createElement(
+"div"
+);
+
+
+
+box.className =
+"message "+role;
+
+
+
+
+
+const avatar =
+document.createElement(
+"div"
+);
+
+
+
+avatar.className =
+"avatar";
+
+
+
+avatar.textContent =
+role==="user"
+?
+"👤"
+:
+"🤖";
+
+
+
+
+
+
+const bubble =
+document.createElement(
+"div"
+);
+
+
+
+bubble.className =
+"bubble";
+
+
+
+bubble.textContent =
+text;
+
+
+
+
+
+box.appendChild(
+avatar
+);
+
+
+box.appendChild(
+bubble
+);
+
+
+
+chat.appendChild(
+box
+);
+
+
+
+chat.scrollTop =
+chat.scrollHeight;
+
+
+
+
+if(save){
+
+
+currentChat.push({
+
+role:role,
+
+text:text
+
+});
+
+
+}
+
+
+
+}
+
+
+
+
+
+/* ==============================
+   CHARGER HISTORIQUE
+============================== */
+
+
+function loadHistory(){
+
+
+if(!historyList)return;
+
+
+
+historyList.innerHTML="";
+
+
+
+conversations
+.slice()
+.reverse()
+.forEach(
+(chatItem,index)=>{
+
+
+
+let item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"history-item";
+
+
+
+let title =
+chatItem.messages?.[0]?.text
+||
+"Nouvelle discussion";
+
+
+
+item.textContent =
+"💬 "+title.substring(0,25);
+
+
+
+item.onclick=()=>{
+
+
+currentChat =
+chatItem.messages
+||
+[];
+
+
+
+
+if(chat){
+
+
+chat.innerHTML="";
+
+
+currentChat.forEach(msg=>{
+
+
+addMessage(
+msg.text,
+msg.role,
+false
+);
+
+
+});
+
+
+}
+
 
 };
 
 
 
-const app =
-initializeApp(firebaseConfig);
-
-
-const db =
-getDatabase(app);
-
-
-
-
-
-// ================= ELEMENTS =================
-
-
-const messages =
-document.getElementById("messages");
-
-
-const input =
-document.getElementById("input");
-
-
-const sendBtn =
-document.getElementById("send");
-
-
-const imageBtn =
-document.getElementById("imageBtn");
-
-
-const imageInput =
-document.getElementById("imageInput");
-
-
-const audioBtn =
-document.getElementById("audioBtn");
-
-
-
-
-
-// ================= SESSION =================
-
-
-let sessionId =
-localStorage.getItem("davbot_session");
-
-
-
-if(!sessionId){
-
-sessionId =
-"chat_"+Date.now();
-
-
-localStorage.setItem(
-"davbot_session",
-sessionId
+historyList.appendChild(
+item
 );
+
+
+
+});
+
 
 }
 
 
 
-let pendingImage=null;
-
-let pendingImagePreview=null;
 
 
 
+/* ==============================
+   CHARGER PROJETS SIDEBAR
+============================== */
+
+
+function loadProjects(){
+
+
+if(!projectList)return;
 
 
 
-// ================= IDENTITE =================
+projectList.innerHTML="";
 
 
-const identity = `
 
+projects
+.slice()
+.reverse()
+.forEach(project=>{
+
+
+let item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"history-item";
+
+
+
+item.textContent =
+"🚀 "+project.name;
+
+
+
+projectList.appendChild(
+item
+);
+
+
+
+});
+
+
+}
+
+
+
+
+
+loadHistory();
+
+loadProjects();
+/* =====================================================
+   PARTIE 2/3
+   GEMINI + CHAT SYSTEM
+===================================================== */
+
+
+
+/* ==============================
+   APPEL GEMINI
+============================== */
+
+
+async function askGemini(message){
+
+
+let contents=[];
+
+
+
+/* Mémoire conversation */
+
+
+currentChat.forEach(msg=>{
+
+
+contents.push({
+
+role:
+msg.role==="user"
+?
+"user"
+:
+"model",
+
+
+parts:[
+
+{
+
+text:msg.text
+
+}
+
+]
+
+});
+
+
+});
+
+
+
+
+
+contents.push({
+
+role:"user",
+
+parts:[
+
+{
+
+text:message
+
+}
+
+]
+
+});
+
+
+
+
+
+const response =
+await fetch(
+
+GEMINI_URL,
+
+{
+
+
+method:"POST",
+
+
+headers:{
+
+
+"Content-Type":
+"application/json",
+
+
+"x-goog-api-key":
+GEMINI_KEY
+
+
+},
+
+
+body:JSON.stringify({
+
+
+contents:contents,
+
+
+
+systemInstruction:{
+
+
+parts:[
+
+{
+
+
+text:
+
+`
 Tu es DAVBOT AI.
 
-Nom : DAVBOT AI
+Tu es un assistant intelligent créé par Ir David Mpongo.
 
-Créateur du projet :
-Ir David Mpongo 🇨🇩
-
-Tu es un assistant intelligent spécialisé :
-
+Tes domaines :
 - programmation
+- création de sites web
+- applications mobiles
 - intelligence artificielle
-- création d'applications
-- technologie
-- développement web et mobile
+- business digital
+- création de projets
 
-Réponds toujours clairement en français.
+Tu réponds toujours en français.
+Tu es professionnel, clair et utile.
+`
 
-`;
+}
 
+]
 
-
-
-
-
-
-// ================= NETTOYAGE =================
+}
 
 
-function cleanAnswer(text){
+})
 
 
-if(!text)
-return "";
+}
+
+);
 
 
-return text
 
-.replace(/\*/g,"")
+const data =
+await response.json();
 
-.replace(
-/ChatGPT/gi,
-"DAVBOT AI"
+
+
+
+if(!response.ok){
+
+
+throw new Error(
+
+data.error?.message
+||
+"Erreur Gemini"
+
+);
+
+
+}
+
+
+
+return (
+
+data
+.candidates[0]
+.content
+.parts[0]
+.text
+
 );
 
 
@@ -182,127 +657,62 @@ return text
 
 
 
-
-// ================= AFFICHAGE =================
-
-
-function addMessage(
-text,
-type,
-image=false,
-imageUrl=null
-){
+/* ==============================
+   INDICATEUR IA
+============================== */
 
 
-const box =
-document.createElement("div");
+function showLoading(){
+
+
+if(!chat)return null;
+
+
+
+let box =
+document.createElement(
+"div"
+);
+
 
 
 box.className =
-"msg "+type;
+"message assistant";
 
 
 
-let html="";
+box.id =
+"davbot-loading";
 
 
 
-if(image && imageUrl){
+box.innerHTML =
 
+`
 
-html = `
-
-
-<div class="content">
-
-${text}
-
-
-<br><br>
-
-
-<img 
-src="${imageUrl}"
-class="image-preview"
-loading="lazy"
->
-
-
-<br>
-
-
-<a href="${imageUrl}"
-download="davbot-image.jpg">
-
-⬇ Télécharger
-
-</a>
-
-
+<div class="avatar">
+🤖
 </div>
 
+<div class="bubble">
+
+⏳ DAVBOT réfléchit...
+
+</div>
 
 `;
 
 
 
-}else{
-
-
-html = `
-
-
-<div class="content">
-
-${type==="ai"
-?cleanAnswer(text)
-:text}
-
-</div>
-
-
-`;
-
-}
+chat.appendChild(
+box
+);
 
 
 
-html += `
+chat.scrollTop =
+chat.scrollHeight;
 
-
-<div class="actions">
-
-
-<button onclick="copyMessage(this)">
-📋
-</button>
-
-
-<button onclick="voiceMessage(this)">
-🔊
-</button>
-
-
-<button onclick="deleteMessage(this)">
-🗑️
-</button>
-
-
-</div>
-
-
-`;
-
-
-
-box.innerHTML=html;
-
-
-messages.appendChild(box);
-
-
-messages.scrollTop =
-messages.scrollHeight;
 
 
 return box;
@@ -315,266 +725,19 @@ return box;
 
 
 
-// ================= SAUVEGARDE =================
+function removeLoading(){
 
 
-function saveMessage(
-role,
-text,
-image=null
-){
-
-
-const id =
-push(
-ref(
-db,
-"conversations/"+sessionId
-)
-).key;
-
-
-
-set(
-
-ref(
-db,
-"conversations/"+sessionId+"/"+id
-),
-
-{
-
-role:role,
-
-text:text,
-
-image:image,
-
-date:Date.now()
-
-}
-
-
-);
-
-
-}
-
-
-
-
-
-
-// ================= MEMOIRE =================
-
-
-onValue(
-
-ref(
-db,
-"conversations/"+sessionId
-),
-
-snapshot=>{
-
-
-if(!snapshot.exists())
-return;
-
-
-
-messages.innerHTML="";
-
-
-
-Object.values(snapshot.val())
-
-.sort(
-(a,b)=>a.date-b.date
-)
-
-.forEach(msg=>{
-
-
-addMessage(
-msg.text,
-msg.role,
-!!msg.image,
-msg.image
-);
-
-
-});
-
-
-});
-// ==========================================
-// DAVBOT AI APP.JS - PARTIE 2/3
-// API IA + IMAGE + MEMOIRE
-// ==========================================
-
-
-
-// ================= RECUPERER HISTORIQUE =================
-
-
-async function getHistory(){
-
-
-const snap =
-await get(
-ref(
-db,
-"conversations/"+sessionId
-)
+let load =
+document.getElementById(
+"davbot-loading"
 );
 
 
 
-if(!snap.exists())
-return "";
+if(load){
 
-
-
-let history="";
-
-
-
-Object.values(snap.val())
-
-.sort(
-(a,b)=>a.date-b.date
-)
-
-.slice(-15)
-
-.forEach(msg=>{
-
-
-history +=
-
-`
-
-${msg.role} :
-${msg.text}
-
-`;
-
-
-
-});
-
-
-
-return history;
-
-
-}
-
-
-
-
-
-
-
-
-// ================= REPONSE IA =================
-
-
-
-async function getAIResponse(message){
-
-
-try{
-
-
-const history =
-await getHistory();
-
-
-
-const prompt =
-
-
-identity +
-
-
-`
-
-Historique :
-
-${history}
-
-
-Nouvelle question :
-
-${message}
-
-
-Réponds comme DAVBOT AI.
-`;
-
-
-
-
-const url =
-
-`${COPILOT_API}?message=${encodeURIComponent(prompt)}&model=default`;
-
-
-
-
-const response =
-await fetch(url);
-
-
-
-if(!response.ok){
-
-throw new Error(
-"Erreur API"
-);
-
-}
-
-
-
-const data =
-await response.json();
-
-
-
-if(
-data.success &&
-data.data &&
-data.data.answer
-){
-
-
-return cleanAnswer(
-data.data.answer
-);
-
-
-}
-
-
-
-return "Je n'ai pas de réponse.";
-
-
-
-
-
-}
-
-catch(error){
-
-
-console.log(error);
-
-
-return "❌ DAVBOT AI rencontre un problème de connexion.";
+load.remove();
 
 }
 
@@ -586,423 +749,27 @@ return "❌ DAVBOT AI rencontre un problème de connexion.";
 
 
 
+/* ==============================
+   ENVOYER MESSAGE
+============================== */
 
 
-// ================= GENERATION IMAGE =================
+async function sendMessage(){
 
 
 
-async function generateImage(prompt){
+if(!input)return;
 
 
 
-const response =
-
-await fetch(
-
-`${GEM_API}/generate`,
-
-{
-
-method:"POST",
-
-
-headers:{
-
-"Content-Type":
-"application/json"
-
-},
-
-
-body:JSON.stringify({
-
-prompt:prompt,
-
-ratio:"1:1",
-
-format:"jpg"
-
-})
-
-}
-
-
-);
-
-
-
-
-
-if(!response.ok){
-
-throw new Error(
-"Génération impossible"
-);
-
-}
-
-
-
-
-const blob =
-await response.blob();
-
-
-
-
-
-// Vérification image
-
-
-if(
-!blob.type.startsWith("image/")
-){
-
-
-throw new Error(
-"Le serveur n'a pas retourné une image"
-);
-
-
-}
-
-
-
-
-
-// Création URL visible
-
-
-const imageURL =
-URL.createObjectURL(blob);
-
-
-
-return imageURL;
-
-
-
-}
-
-
-
-
-
-
-
-
-// ================= MODIFIER IMAGE =================
-
-
-
-async function editImage(
-base64,
-prompt
-){
-
-
-
-const response =
-
-await fetch(
-
-`${GEM_API}/edit`,
-
-{
-
-method:"POST",
-
-headers:{
-
-"Content-Type":
-"application/json"
-
-},
-
-
-body:JSON.stringify({
-
-image:base64,
-
-prompt:prompt,
-
-format:"jpg"
-
-})
-
-
-}
-
-);
-
-
-
-
-if(!response.ok){
-
-throw new Error(
-"Modification échouée"
-);
-
-}
-
-
-
-
-
-const blob =
-await response.blob();
-
-
-
-
-
-return URL.createObjectURL(blob);
-
-
-
-}
-
-
-
-
-
-
-
-
-// ================= IMAGE BASE64 =================
-
-
-
-function imageToBase64(file){
-
-
-return new Promise(
-
-(resolve,reject)=>{
-
-
-const reader =
-new FileReader();
-
-
-
-reader.onload=()=>{
-
-
-resolve(
-
-reader.result
-.split(",")[1]
-
-);
-
-
-};
-
-
-
-reader.onerror =
-reject;
-
-
-
-reader.readAsDataURL(file);
-
-
-}
-
-
-);
-
-
-}
-
-
-
-
-
-
-
-
-// ================= DETECTION IMAGE =================
-
-
-
-function isImageRequest(text){
-
-
-const words=[
-
-
-"image",
-
-"photo",
-
-"dessine",
-
-"crée",
-
-"cree",
-
-"génère",
-
-"genere",
-
-"logo",
-
-"portrait",
-
-"paysage",
-
-"illustration",
-
-"draw",
-
-"create"
-
-
-];
-
-
-
-text=text.toLowerCase();
-
-
-
-return words.some(
-word=>text.includes(word)
-);
-
-
-}
-
-
-
-
-
-
-
-
-// ================= NETTOYAGE PROMPT =================
-
-
-
-function cleanPrompt(text){
-
-
-return text
-
-.replace(
-
-/génère|genere|crée|cree|dessine|image|photo/gi,
-
-""
-
-)
-
-.trim();
-
-
-}
-
-
-
-
-
-
-
-
-// ================= EFFET ECRITURE =================
-
-
-
-function typingEffect(
-element,
-text
-){
-
-
-let i=0;
-
-
-element.innerHTML="";
-
-
-
-const timer =
-setInterval(()=>{
-
-
-element.innerHTML += text[i];
-
-
-i++;
-
-
-if(i>=text.length){
-
-clearInterval(timer);
-
-}
-
-
-},35);
-
-
-}
-
-
-
-
-
-
-
-
-// ================= CHARGEMENT =================
-
-
-
-function showLoading(){
-
-
-return addMessage(
-
-"🤖 DAVBOT AI réfléchit...",
-
-"ai"
-
-);
-
-
-}
-// ==========================================
-// DAVBOT AI APP.JS - PARTIE 3/3
-// ENVOI + AUDIO + ACTIONS
-// ==========================================
-
-
-// ================= ENVOYER MESSAGE =================
-
-
-async function send(){
-
-
-const text =
+let text =
 input.value.trim();
 
 
 
-if(!text && !pendingImage)
-return;
 
+if(!text)return;
 
-
-
-// Message utilisateur
-
-if(text){
 
 
 addMessage(
@@ -1011,74 +778,43 @@ text,
 );
 
 
-saveMessage(
-"user",
-text
-);
-
 
 input.value="";
 
-}
-
-
-try{
 
 
 
-// ================= IMAGE =================
 
-
-
-if(
-text &&
-isImageRequest(text)
-){
-
-
-
-const loading =
+let loading =
 showLoading();
 
 
 
+
 try{
 
 
-const imageURL =
-await generateImage(
-cleanPrompt(text)
+let answer =
+await askGemini(
+text
 );
 
 
 
-loading.remove();
+removeLoading();
 
 
 
 addMessage(
-
-"🎨 Image générée par DAVBOT AI",
-
-"ai",
-
-true,
-
-imageURL
-
+answer,
+"assistant"
 );
 
 
 
-saveMessage(
+saveCurrentChat();
 
-"ai",
 
-"Image générée",
-
-imageURL
-
-);
 
 
 
@@ -1087,20 +823,333 @@ imageURL
 catch(error){
 
 
-loading.remove();
+removeLoading();
+
 
 
 addMessage(
 
-"❌ Erreur génération image",
+"❌ Erreur Gemini : "
++
+error.message,
 
-"ai"
+"assistant"
 
 );
 
 
 }
 
+
+
+
+
+}
+
+
+
+
+
+
+
+
+/* ==============================
+   BOUTON ENVOYER
+============================== */
+
+
+if(sendButton){
+
+
+sendButton.onclick =
+sendMessage;
+
+
+}
+
+
+
+
+
+
+
+/* ==============================
+   ENTER POUR ENVOYER
+============================== */
+
+
+if(input){
+
+
+
+input.addEventListener(
+
+"keydown",
+
+function(e){
+
+
+
+if(
+e.key==="Enter"
+&&
+!e.shiftKey
+){
+
+
+e.preventDefault();
+
+
+sendMessage();
+
+
+}
+
+
+}
+
+
+);
+
+
+}
+
+
+
+
+
+
+
+/* ==============================
+   SAUVEGARDE CHAT ACTUEL
+============================== */
+
+
+function saveCurrentChat(){
+
+
+
+if(currentChat.length===0)
+return;
+
+
+
+let exists =
+conversations.find(
+c =>
+c.messages === currentChat
+);
+
+
+
+if(!exists){
+
+
+
+conversations.push({
+
+date:
+new Date()
+.toLocaleString(),
+
+
+messages:
+currentChat
+
+
+});
+
+
+
+localStorage.setItem(
+
+"davbot_history",
+
+JSON.stringify(conversations)
+
+);
+
+
+loadHistory();
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+/* ==============================
+   NOUVELLE DISCUSSION
+============================== */
+
+
+const newChatButton =
+document.getElementById(
+"newChat"
+);
+
+
+
+if(newChatButton){
+
+
+
+newChatButton.onclick =
+()=>{
+
+
+if(currentChat.length){
+
+
+saveCurrentChat();
+
+
+}
+
+
+
+currentChat=[];
+
+
+
+if(chat){
+
+chat.innerHTML="";
+
+}
+
+
+
+if(welcome){
+
+welcome.style.display=
+"flex";
+
+}
+
+
+
+};
+
+
+}
+
+
+
+
+
+
+/* ==============================
+   SUGGESTIONS
+============================== */
+
+
+document
+.querySelectorAll(
+".suggestion"
+)
+.forEach(button=>{
+
+
+
+button.onclick =
+()=>{
+
+
+let msg =
+button.dataset.msg;
+
+
+
+if(input){
+
+
+input.value =
+msg;
+
+
+sendMessage();
+
+
+}
+
+
+};
+
+
+
+});
+/* =====================================================
+   PARTIE 3/3
+   DAVBOT PROJECT SYSTEM
+===================================================== */
+
+
+
+/* ==============================
+   CREATION PROJET
+============================== */
+
+
+const createProjectButton =
+document.getElementById(
+"createProject"
+);
+
+
+
+
+if(createProjectButton){
+
+
+
+createProjectButton.onclick =
+async function(){
+
+
+
+const name =
+document.getElementById(
+"projectName"
+)
+.value
+.trim();
+
+
+
+const type =
+document.getElementById(
+"projectType"
+)
+.value;
+
+
+
+const description =
+document.getElementById(
+"projectDescription"
+)
+.value
+.trim();
+
+
+
+
+
+if(!name){
+
+
+alert(
+"⚠️ Donne un nom au projet"
+);
 
 
 return;
@@ -1111,58 +1160,150 @@ return;
 
 
 
-
-
-// ================= REPONSE IA =================
-
-
-
-const loading =
-showLoading();
+const result =
+document.getElementById(
+"projectResult"
+);
 
 
 
-const reply =
-await getAIResponse(text);
+result.innerHTML =
+
+`
+
+<h2>
+🤖 DAVBOT travaille...
+</h2>
+
+<p>
+Création du plan du projet...
+</p>
+
+`;
 
 
 
-loading.remove();
 
 
 
-const box =
-addMessage(
 
-"",
+try{
 
-"ai"
+
+
+const answer =
+await askGemini(
+
+`
+
+Crée un projet professionnel.
+
+Nom :
+${name}
+
+
+Type :
+${type}
+
+
+Description :
+${description}
+
+
+
+Donne :
+
+1. Objectif du projet
+
+2. Fonctionnalités principales
+
+3. Technologies conseillées
+
+4. Étapes de développement
+
+5. Conseils pour réussir
+
+
+Réponds clairement.
+
+`
 
 );
 
 
 
-typingEffect(
 
-box.querySelector(".content"),
 
-reply
+
+
+const project = {
+
+
+name:name,
+
+
+type:type,
+
+
+description:description,
+
+
+result:answer,
+
+
+date:
+new Date()
+.toLocaleString()
+
+
+};
+
+
+
+
+
+
+projects.push(
+project
+);
+
+
+
+localStorage.setItem(
+
+"davbot_projects",
+
+JSON.stringify(projects)
 
 );
 
 
 
-saveMessage(
-
-"ai",
-
-reply
-
-);
+loadProjects();
 
 
 
-speak(reply);
+
+
+
+result.innerHTML =
+
+`
+
+<h2>
+
+🚀 ${name}
+
+</h2>
+
+
+<p>
+
+${answer}
+
+</p>
+
+`;
 
 
 
@@ -1172,17 +1313,117 @@ catch(error){
 
 
 
-addMessage(
+result.innerHTML =
 
-"❌ Erreur serveur",
+`
 
-"ai"
+<h2>
+❌ Erreur
+</h2>
 
+<p>
+${error.message}
+</p>
+
+`;
+
+
+
+}
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+/* ==============================
+   AFFICHAGE PROJETS
+============================== */
+
+
+function displayProjects(){
+
+
+if(!projectList)return;
+
+
+
+projectList.innerHTML="";
+
+
+
+projects
+.slice()
+.reverse()
+.forEach(project=>{
+
+
+
+const item =
+document.createElement(
+"div"
 );
 
 
 
-}
+item.className =
+"history-item";
+
+
+
+item.innerHTML =
+
+`
+
+🚀 ${project.name}
+
+`;
+
+
+
+item.onclick =
+()=>{
+
+
+
+const result =
+document.getElementById(
+"projectResult"
+);
+
+
+
+if(result){
+
+
+
+result.innerHTML =
+
+`
+
+<h2>
+
+${project.name}
+
+</h2>
+
+
+<p>
+
+${project.result}
+
+</p>
+
+`;
 
 
 
@@ -1190,20 +1431,18 @@ addMessage(
 
 
 
+};
 
 
 
+projectList.appendChild(
+item
+);
 
 
 
-// ================= BOUTONS =================
+});
 
-
-if(sendBtn){
-
-
-sendBtn.onclick =
-send;
 
 
 }
@@ -1211,18 +1450,31 @@ send;
 
 
 
-input.addEventListener(
-
-"keypress",
-
-(e)=>{
 
 
-if(e.key==="Enter"){
+displayProjects();
 
-send();
 
-}
+
+
+
+
+
+/* ==============================
+   RESTAURATION NOM
+============================== */
+
+
+document
+.querySelectorAll(
+"#userName"
+)
+.forEach(el=>{
+
+
+el.textContent =
+userName ||
+"Utilisateur";
 
 
 });
@@ -1232,369 +1484,13 @@ send();
 
 
 
+/* ==============================
+   LOG
+============================== */
 
 
-// ================= IMAGE UPLOAD =================
+console.log(
 
-
-
-if(imageBtn){
-
-
-imageBtn.onclick=()=>{
-
-
-imageInput.click();
-
-
-};
-
-
-}
-
-
-
-if(imageInput){
-
-
-imageInput.onchange=(e)=>{
-
-
-const file =
-e.target.files[0];
-
-
-
-if(file){
-
-
-pendingImage=file;
-
-
-pendingImagePreview =
-URL.createObjectURL(file);
-
-
-
-addMessage(
-
-"📷 Image envoyée",
-
-"user",
-
-true,
-
-pendingImagePreview
+"🤖 DAVBOT AI prêt"
 
 );
-
-
-
-}
-
-
-};
-
-
-}
-
-
-
-
-
-
-
-
-
-// ================= VOIX IA =================
-
-
-
-function speak(text){
-
-
-const speech =
-new SpeechSynthesisUtterance(text);
-
-
-
-speech.lang =
-"fr-FR";
-
-
-speech.rate=1;
-
-
-
-speechSynthesis.cancel();
-
-
-speechSynthesis.speak(speech);
-
-
-}
-
-
-
-
-window.voiceMessage=function(btn){
-
-
-
-const text =
-
-btn.parentElement
-.parentElement
-.querySelector(".content")
-.innerText;
-
-
-
-speak(text);
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// ================= COPIER =================
-
-
-
-window.copyMessage=function(btn){
-
-
-const text =
-
-btn.parentElement
-.parentElement
-.querySelector(".content")
-.innerText;
-
-
-
-navigator.clipboard.writeText(text);
-
-
-
-btn.innerHTML="✅";
-
-
-setTimeout(()=>{
-
-
-btn.innerHTML="📋";
-
-
-},1000);
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// ================= SUPPRIMER =================
-
-
-
-window.deleteMessage=function(btn){
-
-
-const message =
-btn.parentElement.parentElement;
-
-
-
-message.remove();
-
-
-};
-
-
-
-
-
-
-
-
-
-// ================= RECONNAISSANCE VOCALE =================
-
-
-
-let recognition;
-
-
-
-if(
-"webkitSpeechRecognition" in window
-){
-
-
-recognition =
-new webkitSpeechRecognition();
-
-
-
-recognition.lang =
-"fr-FR";
-
-
-recognition.continuous=false;
-
-
-
-
-recognition.onstart=()=>{
-
-
-if(audioBtn)
-
-audioBtn.innerHTML="🎧";
-
-
-};
-
-
-
-
-
-recognition.onresult=(event)=>{
-
-
-const text =
-
-event.results[0][0]
-.transcript;
-
-
-
-input.value=text;
-
-
-
-send();
-
-
-
-};
-
-
-
-
-
-recognition.onend=()=>{
-
-
-if(audioBtn)
-
-audioBtn.innerHTML="🎤";
-
-
-};
-
-
-
-
-
-
-if(audioBtn){
-
-
-audioBtn.onclick=()=>{
-
-
-recognition.start();
-
-
-};
-
-
-}
-
-
-
-}
-
-else{
-
-
-if(audioBtn){
-
-
-audioBtn.onclick=()=>{
-
-
-alert(
-"Reconnaissance vocale non disponible"
-);
-
-
-};
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-
-
-// ================= NOUVELLE DISCUSSION =================
-
-
-
-window.newChat=function(){
-
-
-
-sessionId =
-"chat_"+Date.now();
-
-
-
-localStorage.setItem(
-
-"davbot_session",
-
-sessionId
-
-);
-
-
-
-messages.innerHTML="";
-
-
-
-addMessage(
-
-"👋 Nouvelle discussion DAVBOT AI",
-
-"ai"
-
-);
-
-
-
-};

@@ -11,7 +11,7 @@
 
 
 const GEMINI_KEY =
-"AQ.Ab8RN6LaOsrcv3vAUKRPpN6ObXziP-TDaLMhxUglMKVPhwPauA";
+"AQ.Ab8RN6KkLFgnjS6LGMk8179gnGVqy8C0WmGytLsxLqdE_dbspg";
 
 
 const GEMINI_URL =

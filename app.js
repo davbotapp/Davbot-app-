@@ -1,20 +1,18 @@
 /* =====================================================
    DAVBOT AI APP.JS
    PARTIE 1/3
-   Gemini + Memory + Chat + Projects
+   DAVBOT API + Memory + Chat + Projects
 ===================================================== */
 
-
-/* ==============================
-   CONFIG GEMINI 
-============================== */
 
 /* ==============================
    CONFIG DAVBOT API
 ============================== */
 
+
 const DAVBOT_API =
 "https://davbot-api-xw6y.vercel.app/api/doki";
+
 
 
 /* ==============================
@@ -60,10 +58,12 @@ let currentChat = [];
 
 function saveData(){
 
+
 localStorage.setItem(
 "davbot_history",
 JSON.stringify(conversations)
 );
+
 
 
 localStorage.setItem(
@@ -71,7 +71,10 @@ localStorage.setItem(
 JSON.stringify(projects)
 );
 
+
 }
+
+
 
 
 
@@ -97,9 +100,13 @@ prompt(
 
 if(!userName || userName.trim()===""){
 
-userName="Utilisateur";
+
+userName =
+"Utilisateur";
+
 
 }
+
 
 
 localStorage.setItem(
@@ -108,15 +115,21 @@ userName
 );
 
 
+
 }
 
 
 
 document
-.querySelectorAll("#userName")
+.querySelectorAll(
+"#userName"
+)
 .forEach(el=>{
 
-el.textContent=userName;
+
+el.textContent =
+userName;
+
 
 });
 
@@ -126,6 +139,7 @@ el.textContent=userName;
 
 
 checkUser();
+
 
 
 
@@ -182,8 +196,9 @@ document.getElementById(
 
 
 
+
 /* ==============================
-   MESSAGE
+   AJOUT MESSAGE
 ============================== */
 
 
@@ -194,13 +209,17 @@ save=true
 ){
 
 
-if(!chat)return;
+if(!chat)
+return;
 
 
 
 if(welcome){
 
-welcome.style.display="none";
+
+welcome.style.display =
+"none";
+
 
 }
 
@@ -214,7 +233,7 @@ document.createElement(
 
 
 box.className =
-"message "+role;
+"message " + role;
 
 
 
@@ -244,6 +263,7 @@ role==="user"
 
 
 
+
 const bubble =
 document.createElement(
 "div"
@@ -263,9 +283,12 @@ text;
 
 
 
+
+
 box.appendChild(
 avatar
 );
+
 
 
 box.appendChild(
@@ -282,6 +305,8 @@ box
 
 chat.scrollTop =
 chat.scrollHeight;
+
+
 
 
 
@@ -308,15 +333,19 @@ text:text
 
 
 
+
+
+
 /* ==============================
-   CHARGER HISTORIQUE
+   HISTORIQUE CHAT
 ============================== */
 
 
 function loadHistory(){
 
 
-if(!historyList)return;
+if(!historyList)
+return;
 
 
 
@@ -328,11 +357,11 @@ conversations
 .slice()
 .reverse()
 .forEach(
-(chatItem,index)=>{
+(chatItem)=>{
 
 
 
-let item =
+const item =
 document.createElement(
 "div"
 );
@@ -344,7 +373,7 @@ item.className =
 
 
 
-let title =
+const title =
 chatItem.messages?.[0]?.text
 ||
 "Nouvelle discussion";
@@ -352,18 +381,23 @@ chatItem.messages?.[0]?.text
 
 
 item.textContent =
-"💬 "+title.substring(0,25);
+"💬 "
++
+title.substring(
+0,
+25
+);
 
 
 
-item.onclick=()=>{
+
+
+item.onclick =
+()=>{
 
 
 currentChat =
-chatItem.messages
-||
-[];
-
+chatItem.messages || [];
 
 
 
@@ -373,7 +407,9 @@ if(chat){
 chat.innerHTML="";
 
 
-currentChat.forEach(msg=>{
+
+currentChat.forEach(
+msg=>{
 
 
 addMessage(
@@ -387,6 +423,7 @@ false
 
 
 }
+
 
 
 };
@@ -409,15 +446,17 @@ item
 
 
 
+
 /* ==============================
-   CHARGER PROJETS SIDEBAR
+   PROJETS SIDEBAR
 ============================== */
 
 
 function loadProjects(){
 
 
-if(!projectList)return;
+if(!projectList)
+return;
 
 
 
@@ -428,10 +467,12 @@ projectList.innerHTML="";
 projects
 .slice()
 .reverse()
-.forEach(project=>{
+.forEach(
+project=>{
 
 
-let item =
+
+const item =
 document.createElement(
 "div"
 );
@@ -444,7 +485,9 @@ item.className =
 
 
 item.textContent =
-"🚀 "+project.name;
+"🚀 "
++
+project.name;
 
 
 
@@ -463,20 +506,15 @@ item
 
 
 
+
 loadHistory();
 
 loadProjects();
 /* =====================================================
+   DAVBOT AI APP.JS
    PARTIE 2/3
-   GEMINI + CHAT SYSTEM
+   DAVBOT API + CHAT SYSTEM
 ===================================================== */
-
-
-
-/* ==============================
-   APPEL GEMINI
-============================== */
-
 
 
 
@@ -488,27 +526,43 @@ loadProjects();
 async function askDoki(message){
 
 
-const response = await fetch(
+const response =
+await fetch(
+
 DAVBOT_API,
+
 {
+
 method:"POST",
 
+
 headers:{
-"Content-Type":"application/json"
+
+
+"Content-Type":
+"application/json"
+
+
 },
+
 
 body:JSON.stringify({
 
-message: message
+
+message:message
+
 
 })
 
+
 }
+
 );
 
 
 
-const data = await response.json();
+const data =
+await response.json();
 
 
 
@@ -519,12 +573,17 @@ data
 
 
 
+
 if(!response.ok){
 
+
 throw new Error(
+
 data.message ||
 "Erreur API DAVBOT"
+
 );
+
 
 }
 
@@ -533,7 +592,15 @@ data.message ||
 return data.message;
 
 
+
 }
+
+
+
+
+
+
+
 /* ==============================
    INDICATEUR IA
 ============================== */
@@ -542,11 +609,12 @@ return data.message;
 function showLoading(){
 
 
-if(!chat)return null;
+if(!chat)
+return null;
 
 
 
-let box =
+const box =
 document.createElement(
 "div"
 );
@@ -570,6 +638,7 @@ box.innerHTML =
 <div class="avatar">
 🤖
 </div>
+
 
 <div class="bubble">
 
@@ -595,7 +664,9 @@ chat.scrollHeight;
 return box;
 
 
+
 }
+
 
 
 
@@ -605,21 +676,25 @@ return box;
 function removeLoading(){
 
 
-let load =
+const loading =
 document.getElementById(
 "davbot-loading"
 );
 
 
 
-if(load){
+if(loading){
 
-load.remove();
+
+loading.remove();
+
 
 }
 
 
 }
+
+
 
 
 
@@ -635,17 +710,21 @@ async function sendMessage(){
 
 
 
-if(!input)return;
+if(!input)
+return;
 
 
 
-let text =
+const text =
 input.value.trim();
 
 
 
 
-if(!text)return;
+if(!text)
+return;
+
+
 
 
 
@@ -656,14 +735,15 @@ text,
 
 
 
+
 input.value="";
 
 
 
 
 
-let loading =
 showLoading();
+
 
 
 
@@ -671,10 +751,12 @@ showLoading();
 try{
 
 
-let answer =
-await askGemini(
+const answer =
+await askDoki(
 text
 );
+
+
 
 
 
@@ -682,15 +764,21 @@ removeLoading();
 
 
 
+
+
 addMessage(
+
 answer,
+
 "assistant"
+
 );
 
 
 
-saveCurrentChat();
 
+
+saveCurrentChat();
 
 
 
@@ -700,13 +788,15 @@ saveCurrentChat();
 catch(error){
 
 
+
 removeLoading();
+
 
 
 
 addMessage(
 
-"❌ Erreur Gemini : "
+"❌ Erreur DAVBOT API : "
 +
 error.message,
 
@@ -715,8 +805,8 @@ error.message,
 );
 
 
-}
 
+}
 
 
 
@@ -750,13 +840,13 @@ sendMessage;
 
 
 
+
 /* ==============================
-   ENTER POUR ENVOYER
+   ENTRÉE CLAVIER
 ============================== */
 
 
 if(input){
-
 
 
 input.addEventListener(
@@ -764,7 +854,6 @@ input.addEventListener(
 "keydown",
 
 function(e){
-
 
 
 if(
@@ -783,6 +872,7 @@ sendMessage();
 }
 
 
+
 }
 
 
@@ -790,6 +880,7 @@ sendMessage();
 
 
 }
+
 
 
 
@@ -798,7 +889,7 @@ sendMessage();
 
 
 /* ==============================
-   SAUVEGARDE CHAT ACTUEL
+   SAUVEGARDE CHAT
 ============================== */
 
 
@@ -806,16 +897,27 @@ function saveCurrentChat(){
 
 
 
-if(currentChat.length===0)
+if(
+currentChat.length===0
+)
 return;
 
 
 
-let exists =
+
+
+const exists =
 conversations.find(
+
 c =>
-c.messages === currentChat
+
+JSON.stringify(c.messages)
+===
+JSON.stringify(currentChat)
+
 );
+
+
 
 
 
@@ -838,23 +940,24 @@ currentChat
 
 
 
-localStorage.setItem(
 
-"davbot_history",
 
-JSON.stringify(conversations)
+saveData();
 
-);
+
+
 
 
 loadHistory();
 
 
-}
-
-
 
 }
+
+
+
+}
+
 
 
 
@@ -875,12 +978,13 @@ document.getElementById(
 
 
 
-if(newChatButton){
 
+if(newChatButton){
 
 
 newChatButton.onclick =
 ()=>{
+
 
 
 if(currentChat.length){
@@ -893,31 +997,45 @@ saveCurrentChat();
 
 
 
+
+
 currentChat=[];
+
 
 
 
 if(chat){
 
+
 chat.innerHTML="";
 
+
 }
+
+
 
 
 
 if(welcome){
 
-welcome.style.display=
+
+welcome.style.display =
 "flex";
 
+
 }
+
+
 
 
 
 };
 
 
+
 }
+
+
 
 
 
@@ -933,7 +1051,8 @@ document
 .querySelectorAll(
 ".suggestion"
 )
-.forEach(button=>{
+.forEach(
+button=>{
 
 
 
@@ -941,22 +1060,27 @@ button.onclick =
 ()=>{
 
 
-let msg =
+const msg =
 button.dataset.msg;
+
 
 
 
 if(input){
 
 
+
 input.value =
 msg;
+
 
 
 sendMessage();
 
 
+
 }
+
 
 
 };
@@ -965,6 +1089,7 @@ sendMessage();
 
 });
 /* =====================================================
+   DAVBOT AI APP.JS
    PARTIE 3/3
    DAVBOT PROJECT SYSTEM
 ===================================================== */
@@ -1002,11 +1127,13 @@ document.getElementById(
 
 
 
+
 const type =
 document.getElementById(
 "projectType"
 )
 .value;
+
 
 
 
@@ -1016,6 +1143,7 @@ document.getElementById(
 )
 .value
 .trim();
+
 
 
 
@@ -1037,11 +1165,18 @@ return;
 
 
 
+
+
 const result =
 document.getElementById(
 "projectResult"
 );
 
+
+
+
+
+if(result){
 
 
 result.innerHTML =
@@ -1052,11 +1187,17 @@ result.innerHTML =
 🤖 DAVBOT travaille...
 </h2>
 
+
 <p>
 Création du plan du projet...
 </p>
 
 `;
+
+
+
+}
+
 
 
 
@@ -1069,13 +1210,13 @@ try{
 
 
 const answer =
-await askGemini(
+await askDoki(
 
 `
 
 Crée un projet professionnel.
 
-Nom :
+Nom du projet :
 ${name}
 
 
@@ -1101,7 +1242,7 @@ Donne :
 5. Conseils pour réussir
 
 
-Réponds clairement.
+Réponds clairement en français.
 
 `
 
@@ -1146,13 +1287,13 @@ project
 
 
 
-localStorage.setItem(
 
-"davbot_projects",
 
-JSON.stringify(projects)
 
-);
+saveData();
+
+
+
 
 
 
@@ -1163,24 +1304,30 @@ loadProjects();
 
 
 
+
+if(result){
+
+
 result.innerHTML =
 
 `
 
 <h2>
-
 🚀 ${name}
-
 </h2>
 
 
 <p>
-
 ${answer}
-
 </p>
 
 `;
+
+
+
+}
+
+
 
 
 
@@ -1190,6 +1337,9 @@ catch(error){
 
 
 
+if(result){
+
+
 result.innerHTML =
 
 `
@@ -1197,6 +1347,7 @@ result.innerHTML =
 <h2>
 ❌ Erreur
 </h2>
+
 
 <p>
 ${error.message}
@@ -1210,11 +1361,20 @@ ${error.message}
 
 
 
+}
+
+
+
+
+
 };
 
 
 
 }
+
+
+
 
 
 
@@ -1230,7 +1390,8 @@ ${error.message}
 function displayProjects(){
 
 
-if(!projectList)return;
+if(!projectList)
+return;
 
 
 
@@ -1241,7 +1402,8 @@ projectList.innerHTML="";
 projects
 .slice()
 .reverse()
-.forEach(project=>{
+.forEach(
+project=>{
 
 
 
@@ -1252,8 +1414,11 @@ document.createElement(
 
 
 
+
 item.className =
 "history-item";
+
+
 
 
 
@@ -1264,6 +1429,9 @@ item.innerHTML =
 🚀 ${project.name}
 
 `;
+
+
+
 
 
 
@@ -1279,6 +1447,8 @@ document.getElementById(
 
 
 
+
+
 if(result){
 
 
@@ -1288,17 +1458,14 @@ result.innerHTML =
 `
 
 <h2>
-
 ${project.name}
-
 </h2>
 
 
 <p>
-
 ${project.result}
-
 </p>
+
 
 `;
 
@@ -1312,14 +1479,18 @@ ${project.result}
 
 
 
+
+
+
 projectList.appendChild(
 item
 );
 
 
 
-});
 
+
+});
 
 
 }
@@ -1329,7 +1500,11 @@ item
 
 
 
+
+
 displayProjects();
+
+
 
 
 
@@ -1346,12 +1521,14 @@ document
 .querySelectorAll(
 "#userName"
 )
-.forEach(el=>{
+.forEach(
+el=>{
 
 
 el.textContent =
 userName ||
 "Utilisateur";
+
 
 
 });
@@ -1361,13 +1538,43 @@ userName ||
 
 
 
+
+
+
 /* ==============================
-   LOG
+   AUTO SAVE
+============================== */
+
+
+window.addEventListener(
+
+"beforeunload",
+
+()=>{
+
+
+saveData();
+
+
+}
+
+);
+
+
+
+
+
+
+
+
+
+/* ==============================
+   LOG FINAL
 ============================== */
 
 
 console.log(
 
-"🤖 DAVBOT AI prêt"
+"🤖 DAVBOT AI connecté avec API Doki"
 
 );

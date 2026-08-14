@@ -9,14 +9,12 @@
    CONFIG GEMINI 
 ============================== */
 
+/* ==============================
+   CONFIG DAVBOT API
+============================== */
 
-const GEMINI_KEY =
-"AQ.Ab8RN6KkLFgnjS6LGMk8179gnGVqy8C0WmGytLsxLqdE_dbspg";
-
-
-const GEMINI_URL =
-"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
-
+const DAVBOT_API =
+"https://davbot-api-xw6y.vercel.app/api/doki";
 
 
 /* ==============================
@@ -480,183 +478,62 @@ loadProjects();
 ============================== */
 
 
-async function askGemini(message){
 
 
-let contents=[];
+/* ==============================
+   APPEL DAVBOT API
+============================== */
 
 
-
-/* Mémoire conversation */
-
-
-currentChat.forEach(msg=>{
+async function askDoki(message){
 
 
-contents.push({
-
-role:
-msg.role==="user"
-?
-"user"
-:
-"model",
-
-
-parts:[
-
+const response = await fetch(
+DAVBOT_API,
 {
-
-text:msg.text
-
-}
-
-]
-
-});
-
-
-});
-
-
-
-
-
-contents.push({
-
-role:"user",
-
-parts:[
-
-{
-
-text:message
-
-}
-
-]
-
-});
-
-
-
-
-
-const response =
-await fetch(
-
-GEMINI_URL,
-
-{
-
-
 method:"POST",
 
-
 headers:{
-
-
-"Content-Type":
-"application/json",
-
-
-"x-goog-api-key":
-GEMINI_KEY
-
-
+"Content-Type":"application/json"
 },
-
 
 body:JSON.stringify({
 
-
-contents:contents,
-
-
-
-systemInstruction:{
-
-
-parts:[
-
-{
-
-
-text:
-
-`
-Tu es DAVBOT AI.
-
-Tu es un assistant intelligent créé par Ir David Mpongo.
-
-Tes domaines :
-- programmation
-- création de sites web
-- applications mobiles
-- intelligence artificielle
-- business digital
-- création de projets
-
-Tu réponds toujours en français.
-Tu es professionnel, clair et utile.
-`
-
-}
-
-]
-
-}
-
+message: message
 
 })
 
-
 }
-
 );
 
 
 
-const data =
-await response.json();
+const data = await response.json();
 
+
+
+console.log(
+"Réponse DAVBOT :",
+data
+);
 
 
 
 if(!response.ok){
 
-
 throw new Error(
-
-data.error?.message
-||
-"Erreur Gemini"
-
+data.message ||
+"Erreur API DAVBOT"
 );
-
 
 }
 
 
 
-return (
-
-data
-.candidates[0]
-.content
-.parts[0]
-.text
-
-);
+return data.message;
 
 
 }
-
-
-
-
-
-
 /* ==============================
    INDICATEUR IA
 ============================== */

@@ -11,7 +11,7 @@
 
 
 const DAVBOT_API =
-"https://davbot-api-xw6y.vercel.app/api/ask";
+"https://davbot-api-xw6y.vercel.app/api/ask-apk";
 
 
 

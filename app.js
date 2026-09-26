@@ -1,121 +1,116 @@
 (() => {
-  'use strict';
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const KEY="davbot_v4_chats";
+let chats=load(), currentId=chats[0]?.id||null, attached=null, recognition=null, recording=false;
 
-  const API = '/api/chat';
-  const STORAGE = 'davbot_ai_chats_v1';
-  const CURRENT = 'davbot_ai_current_v1';
-
-  const $ = (s) => document.querySelector(s);
-  const $$ = (s) => [...document.querySelectorAll(s)];
-  const chat = $('#chat');
-  const input = $('#messageInput');
-  const send = $('#sendButton');
-  const historyList = $('#historyList');
-  const welcome = $('#welcome');
-  const newChat = $('#newChat');
-
-  let chats = loadChats();
-  let currentId = localStorage.getItem(CURRENT) || null;
-  let busy = false;
-
-  function uid() { return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
-  function loadChats() { try { return JSON.parse(localStorage.getItem(STORAGE) || '[]'); } catch { return []; } }
-  function save() { localStorage.setItem(STORAGE, JSON.stringify(chats.slice(0, 30))); localStorage.setItem(CURRENT, currentId || ''); }
-  function current() { return chats.find(c => c.id === currentId); }
-  function ensureChat() {
-    let c = current();
-    if (!c) { c = { id: uid(), title: 'Nouvelle discussion', messages: [], createdAt: Date.now() }; chats.unshift(c); currentId = c.id; save(); }
-    return c;
-  }
-  function escapeHtml(v) { return String(v).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
-  function renderHistory() {
-    if (!historyList) return;
-    historyList.innerHTML = chats.length ? chats.map(c => `<div class="history-item ${c.id === currentId ? 'active' : ''}" data-id="${c.id}" title="${escapeHtml(c.title)}">${escapeHtml(c.title)}</div>`).join('') : '';
-    $$('.history-item').forEach(el => el.onclick = () => { currentId = el.dataset.id; save(); render(); });
-  }
-  function render() {
-    const c = ensureChat();
-    renderHistory();
-    if (!chat) return;
-    chat.innerHTML = '';
-    if (!c.messages.length) { chat.appendChild(welcome); welcome.style.display = 'flex'; return; }
-    welcome.style.display = 'none';
-    c.messages.forEach(m => addMessage(m.role, m.content, false));
-    scrollBottom();
-  }
-  function scrollBottom() { requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; }); }
-  function addMessage(role, content, scroll = true) {
-    const row = document.createElement('div'); row.className = 'message ' + role;
-    const avatar = document.createElement('div'); avatar.className = 'avatar'; avatar.textContent = role === 'user' ? 'U' : 'D';
-    const box = document.createElement('div'); box.className = 'bubble'; box.innerHTML = formatText(content);
-    row.append(avatar, box); chat.appendChild(row);
-    if (role === 'assistant') addActions(row, content);
-    if (scroll) scrollBottom();
-    return row;
-  }
-  function formatText(text) {
-    const safe = escapeHtml(text);
-    return safe.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>').replace(/\n/g, '<br>');
-  }
-  function addActions(row, content) {
-    const actions = document.createElement('div'); actions.className = 'message-actions';
-    const copy = document.createElement('button'); copy.type='button'; copy.title='Copier'; copy.textContent='Copier';
-    const speak = document.createElement('button'); speak.type='button'; speak.title='Lire'; speak.textContent='Lire';
-    copy.onclick = async () => { try { await navigator.clipboard.writeText(content); copy.textContent='Copié'; setTimeout(()=>copy.textContent='Copier',1200); } catch {} };
-    speak.onclick = () => speakText(content);
-    actions.append(copy, speak); row.appendChild(actions);
-  }
-  function speakText(text) {
-    if (!('speechSynthesis' in window)) return;
-    speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang='fr-FR'; speechSynthesis.speak(u);
-  }
-  function typing() {
-    const row = document.createElement('div'); row.className='message assistant'; row.id='typing';
-    const avatar=document.createElement('div'); avatar.className='avatar'; avatar.textContent='D';
-    const box=document.createElement('div'); box.className='bubble'; box.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
-    row.append(avatar,box); chat.appendChild(row); scrollBottom(); return row;
-  }
-  async function sendMessage(text) {
-    text = String(text || '').trim(); if (!text || busy) return;
-    const c = ensureChat(); busy=true; send.disabled=true;
-    if (!c.messages.length) c.title = text.length > 38 ? text.slice(0,38) + '…' : text;
-    c.messages.push({role:'user', content:text}); save(); render();
-    typing();
-    try {
-      const history = c.messages.slice(-20).map(m => ({ role:m.role, content:m.content }));
-      const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body:JSON.stringify({message:text, history}) });
-      const data = await r.json().catch(()=>({}));
-      if (!r.ok) throw new Error(data.error || 'Erreur API');
-      const answer = data.answer ?? data.message ?? data.response ?? data.text ?? data.result;
-      if (!answer) throw new Error('Réponse API vide');
-      $('#typing')?.remove();
-      c.messages.push({role:'assistant', content:String(answer)}); save(); addMessage('assistant', String(answer));
-    } catch (e) {
-      $('#typing')?.remove();
-      addMessage('assistant', 'Désolé, la connexion à DAVBOT AI a échoué. Vérifie le déploiement du backend et réessaie.');
-      console.error(e);
-    } finally { busy=false; send.disabled=false; input.focus(); }
-  }
-  send?.addEventListener('click', () => sendMessage(input.value).then(()=>input.value=''));
-  input?.addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); const v=input.value; input.value=''; sendMessage(v); } });
-  newChat?.addEventListener('click', () => { const c={id:uid(),title:'Nouvelle discussion',messages:[],createdAt:Date.now()}; chats.unshift(c); currentId=c.id; save(); render(); input?.focus(); });
-  $$('.suggestions button').forEach(b => b.addEventListener('click', () => sendMessage(b.dataset.msg || b.textContent)));
-
-  // Dictée vocale : Web Speech API, aucune donnée audio envoyée au backend.
-  const mic=document.createElement('button'); mic.type='button'; mic.className='voice-button'; mic.title='Message vocal'; mic.textContent='🎙';
-  document.querySelector('.input-box')?.insertBefore(mic, send);
-  const SR=window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SR) {
-    const rec=new SR(); rec.lang='fr-FR'; rec.interimResults=false; rec.continuous=false;
-    rec.onstart=()=>mic.classList.add('recording'); rec.onend=()=>mic.classList.remove('recording');
-    rec.onresult=e=>{ input.value=(input.value+' '+e.results[0][0].transcript).trim(); input.focus(); };
-    mic.onclick=()=>{ try { rec.start(); } catch {} };
-  } else mic.disabled=true;
-
-  // Export simple d'une discussion courante.
-  const exportBtn=document.createElement('button'); exportBtn.type='button'; exportBtn.className='utility-button'; exportBtn.textContent='Exporter'; exportBtn.title='Exporter la discussion';
-  document.querySelector('.topbar')?.appendChild(exportBtn);
-  exportBtn.onclick=()=>{ const c=current(); if(!c) return; const txt=c.messages.map(m=>(m.role==='user'?'Vous':'DAVBOT AI')+' :\n'+m.content).join('\n\n'); const blob=new Blob([txt],{type:'text/plain;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(c.title||'davbot-discussion').replace(/[^\w\-]+/g,'_')+'.txt'; a.click(); URL.revokeObjectURL(a.href); };
-
-  render();
+function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2)}
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch{return[]}}
+function save(){localStorage.setItem(KEY,JSON.stringify(chats))}
+function current(){return chats.find(c=>c.id===currentId)}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function icon(name){
+ const icons={bot:'<svg viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="12" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2M8.5 12h.01M15.5 12h.01M9 16h6"/></svg>',
+ user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>',
+ copy:'<svg viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"/></svg>',
+ trash:'<svg viewBox="0 0 24 24"><path d="M5 7h14M9 7V4.5h6V7m-8 0 .8 13h8.4L17 7"/></svg>',
+ download:'<svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M5 19.5h14"/></svg>'};
+ return icons[name]||"";
+}
+function newChat(){
+ const c={id:uid(),title:"Nouvelle discussion",messages:[],created:Date.now()};
+ chats.unshift(c);currentId=c.id;save();render();setView("chat");focusInput()
+}
+function ensure(){if(!currentId||!current()){newChat();return}render()}
+function renderHistory(){
+ const h=$("#history");h.innerHTML="";
+ chats.forEach(c=>{const row=document.createElement("div");row.className="history-item"+(c.id===currentId?" active":"");
+ row.innerHTML=`<span class="history-name">${escapeHtml(c.title||"Nouvelle discussion")}</span><button class="history-del" title="Supprimer">${icon("trash")}</button>`;
+ row.onclick=e=>{if(e.target.closest("button"))return;currentId=c.id;render();setView("chat")};
+ row.querySelector("button").onclick=e=>{e.stopPropagation();chats=chats.filter(x=>x.id!==c.id);if(c.id===currentId)currentId=chats[0]?.id||null;if(!currentId)newChat();else{save();render()}};
+ h.appendChild(row)})
+}
+function render(){
+ renderHistory();const m=$("#messages"),c=current();m.innerHTML="";
+ if(!c){newChat();return}
+ if(!c.messages.length){m.innerHTML=`<div class="welcome"><div class="welcome-logo">${icon("bot")}</div><h1>Bonjour 👋</h1><p>Je suis <b>DAVBOT AI</b>. Pose-moi une question, demande du code, un texte ou une analyse.</p><div class="suggestions">
+ <button class="suggestion">Crée-moi une application web moderne</button><button class="suggestion">Explique-moi JavaScript simplement</button><button class="suggestion">Écris une description professionnelle</button><button class="suggestion">Génère une idée de logo</button></div></div>`;
+ $$(".suggestion").forEach(b=>b.onclick=()=>{setView("chat");$("#input").value=b.textContent;send()});return}
+ c.messages.forEach((msg,i)=>addMessageDOM(msg,i));
+ m.scrollTop=m.scrollHeight
+}
+function addMessageDOM(msg,i){
+ const m=$("#messages"),row=document.createElement("div");row.className="msg "+(msg.role==="user"?"user":"assistant");
+ row.innerHTML=`<div class="avatar">${icon(msg.role==="user"?"user":"bot")}</div><div><div class="bubble">${escapeHtml(msg.content)}</div><div class="msg-actions"><button data-copy>${icon("copy")} Copier</button><button data-del>${icon("trash")} Supprimer</button>${msg.role==="assistant"?'<button data-speak>🔊 Lire</button>':""}</div></div>`;
+ row.querySelector("[data-copy]").onclick=()=>navigator.clipboard?.writeText(msg.content);
+ row.querySelector("[data-del]").onclick=()=>{const c=current();c.messages.splice(i,1);save();render()};
+ row.querySelector("[data-speak]")?.addEventListener("click",()=>speak(msg.content));
+ m.appendChild(row)
+}
+function add(role,content,extra={}){
+ const c=current();c.messages.push({role,content,...extra});
+ if(role==="user"&&c.title==="Nouvelle discussion")c.title=content.slice(0,42);
+ save();render()
+}
+function speak(t){if("speechSynthesis"in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="fr-FR";speechSynthesis.speak(u)}}
+async function postChat(message){
+ const c=current();const history=c.messages.slice(-24).map(x=>({role:x.role,content:x.content}));
+ const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message,history})});
+ const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{data={text:raw}};
+ if(!r.ok)throw new Error(data.error||"Erreur serveur");
+ return data.answer||data.message||data.response||data.text||data.result||"Réponse vide."
+}
+async function send(){
+ const input=$("#input"),text=input.value.trim();if(!text||$("#typing").classList.contains("busy"))return;
+ input.value="";resizeInput();add("user",attached?text+`\n[Fichier joint: ${attached.name}]`:text);attached=null;$("#attachPreview").classList.add("hidden");
+ $("#typing").classList.remove("hidden");$("#typing").classList.add("busy");
+ try{const answer=await postChat(text);add("assistant",answer)}catch(e){add("assistant","Erreur : "+e.message)}finally{$("#typing").classList.add("hidden");$("#typing").classList.remove("busy")}
+}
+async function generateImage(prompt){
+ if(!prompt.trim())return;
+ const box=$("#imageResult");box.classList.remove("hidden");box.innerHTML="<p>Génération en cours…</p>";
+ try{
+  const r=await fetch("/api/image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:prompt.trim()})});
+  const type=r.headers.get("content-type")||""; if(!r.ok){let e=await r.text();try{e=JSON.parse(e).error||e}catch{}throw new Error(e||"Erreur image")}
+  let url="";
+  if(type.startsWith("image/")){const blob=await r.blob();url=URL.createObjectURL(blob)}
+  else{const d=await r.json();url=d.url||d.imageUrl||d.image_url||d.image||d.output||d.result||"";if(typeof url!=="string")throw new Error("Format image non reconnu");if(url.startsWith("data:image/")){}else if(/^[A-Za-z0-9+/=]{100,}$/.test(url))url="data:image/png;base64,"+url}
+  if(!url)throw new Error("Aucune image reçue");
+  box.innerHTML=`<img src="${url}" alt="Image générée"><br><a class="download-btn" href="${url}" download="davbot-image.png">${icon("download")} Télécharger</a>`;
+ }catch(e){box.innerHTML=`<p>Erreur : ${escapeHtml(e.message)}</p>`}
+}
+async function generateProject(){
+ const p=$("#projectPrompt").value.trim(),out=$("#projectResult");if(!p)return;
+ out.classList.remove("hidden");out.textContent="Génération en cours…";
+ try{out.textContent=await postChat("Crée un plan de projet web complet et concret pour : "+p)}catch(e){out.textContent="Erreur : "+e.message}
+}
+function setView(v){
+ $$(".view").forEach(x=>x.classList.add("hidden"));$("#"+(v==="chat"?"chatView":v==="project"?"projectView":"imageView")).classList.remove("hidden");
+ $$(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===v));$("#sidebar").classList.remove("open");if(v==="chat")render()
+}
+function resizeInput(){const x=$("#input");x.style.height="auto";x.style.height=Math.min(x.scrollHeight,180)+"px"}
+async function startDictation(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){alert("La dictée vocale n'est pas disponible sur ce navigateur.");return}
+ if(recognition){recognition.stop();return}
+ recognition=new SR();recognition.lang="fr-FR";recognition.continuous=false;recognition.interimResults=true;
+ recognition.onresult=e=>{$("#input").value=[...e.results].map(r=>r[0].transcript).join("");resizeInput()};
+ recognition.onend=()=>{recognition=null;$("#micBtn").classList.remove("recording")};recognition.onerror=()=>{recognition=null;$("#micBtn").classList.remove("recording")};
+ $("#micBtn").classList.add("recording");recognition.start()
+}
+function exportChat(){
+ const c=current();if(!c)return;const text=c.messages.map(m=>`${m.role==="user"?"Vous":"DAVBOT AI"}:\n${m.content}`).join("\n\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"}));a.download="davbot-discussion.txt";a.click()
+}
+$("#newChat").onclick=newChat;$("#sendBtn").onclick=send;$("#micBtn").onclick=startDictation;$("#exportBtn").onclick=exportChat;
+$("#themeBtn").onclick=()=>{document.body.classList.toggle("light");localStorage.setItem("davbot_theme",document.body.classList.contains("light")?"light":"dark")};
+$("#clearBtn").onclick=()=>{if(confirm("Supprimer toutes les discussions ?")){chats=[];newChat()}};
+$("#menuBtn").onclick=()=>$("#sidebar").classList.toggle("open");
+$("#attachBtn").onclick=()=>$("#fileInput").click();
+$("#fileInput").onchange=e=>{attached=e.target.files[0]||null;if(attached){$("#attachPreview").textContent="Fichier : "+attached.name;$("#attachPreview").classList.remove("hidden")}e.target.value=""};
+$("#input").addEventListener("input",resizeInput);$("#input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
+$$(".nav-item").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+$("#imageBtn").onclick=()=>generateImage($("#imagePrompt").value);$("#projectBtn").onclick=generateProject;
+if(localStorage.getItem("davbot_theme")==="light")document.body.classList.add("light");
+ensure();
 })();

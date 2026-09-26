@@ -1,1 +1,5 @@
-{"name":"davbot-ai","version":"1.0.0","private":true,"type":"module","engines":{"node":">=20"}}
+{
+  "name": "davbot-ai",
+  "private": true,
+  "version": "1.0.0"
+}

@@ -1,13 +1,8 @@
-const config = require("./config.js");
-
 const UPSTREAM = 'https://davbot-api-xw6y.vercel.app/api/ask-apk';
 const LIMIT = 30, WINDOW = 60000;
 const buckets = new Map();
 
-function clientIp(req){
-  return (req.headers['x-forwarded-for']||'').split(',')[0].trim() ||
-    req.socket?.remoteAddress || 'unknown';
-}
+function clientIp(req){return (req.headers['x-forwarded-for']||'').split(',')[0].trim() || req.socket?.remoteAddress || 'unknown';}
 function allowed(ip){
   const now=Date.now(), b=buckets.get(ip)||{t:now,n:0};
   if(now-b.t>WINDOW){b.t=now;b.n=0}
@@ -21,50 +16,10 @@ function originAllowed(req){
 }
 function cleanHistory(h){
   if(!Array.isArray(h)) return [];
-  return h.slice(-config.MAX_HISTORY).map(x=>({
-    role: String(x?.role||'user').slice(0,20),
-    content: String(x?.content||'').slice(0,8000)
+  return h.slice(-24).map(x=>({
+    role:String(x?.role||'user').slice(0,20),
+    content:String(x?.content||'').slice(0,8000)
   }));
-}
-function normalizeImage(raw){
-  const image = raw?.image || raw?.imageData || raw?.imageBase64 || raw?.image_url || raw?.imageUrl;
-  if(!image || typeof image !== "string") return null;
-  if(image.startsWith("data:image/")) return image;
-  if(/^https?:\/\/.+/i.test(image)) return image;
-  return `data:image/jpeg;base64,${image}`;
-}
-async function groqVision(message, history, image){
-  if(!config.GROQ_API_KEY || config.GROQ_API_KEY.startsWith("REMPLACE_")){
-    throw new Error("La clé GROQ_API_KEY n'est pas configurée dans api/config.js.");
-  }
-  const messages = [];
-  for(const h of history){
-    messages.push({role:h.role === "assistant" ? "assistant" : "user", content:h.content});
-  }
-  messages.push({
-    role:"user",
-    content:[
-      {type:"text", text: message || "Analyse cette image et explique ce que tu vois."},
-      {type:"image_url", image_url:{url:image}}
-    ]
-  });
-  const r=await fetch(config.GROQ_API_URL,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+config.GROQ_API_KEY
-    },
-    body:JSON.stringify({
-      model:config.GROQ_MODEL,
-      messages,
-      temperature:0.2,
-      max_tokens:2000
-    })
-  });
-  const raw=await r.text();
-  let data; try{data=JSON.parse(raw)}catch{data={}};
-  if(!r.ok) throw new Error(data?.error?.message || "Erreur Groq Vision.");
-  return data?.choices?.[0]?.message?.content || "Je n'ai pas pu analyser cette image.";
 }
 module.exports=async(req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');
@@ -81,23 +36,22 @@ module.exports=async(req,res)=>{
     const body=typeof req.body==='string'?JSON.parse(req.body||'{}'):(req.body||{});
     const message=String(body.message||'').trim();
     if(!message) return res.status(400).json({error:'Message vide.'});
-    if(message.length>config.MAX_MESSAGE_LENGTH) return res.status(413).json({error:'Message trop long.'});
-
-    const image=normalizeImage(body);
-    const history=cleanHistory(body.history);
-
-    // Image présente: analyse multimodale directement avec Groq Vision.
-    if(image){
-      if(image.length > config.MAX_IMAGE_BYTES * 1.4) {
-        return res.status(413).json({error:'Image trop volumineuse. Choisis une image plus légère.'});
-      }
-      const answer=await groqVision(message,history,image);
-      return res.status(200).json({answer,vision:true});
+    if(message.length>16000) return res.status(413).json({error:'Message trop long.'});
+    const payload={message,history:cleanHistory(body.history)};
+    // Optional image input: forwarded to the separately deployed DAVBOT API.
+    // The browser never receives or needs any upstream API key.
+    const image = body.image || body.imageUrl || body.image_url || body.imageData || body.imageBase64;
+    if (typeof image === 'string' && image.length <= 12_000_000) {
+      payload.image = image;
     }
-
-    // Texte sans image: conservation de ton API DAVBOT actuelle.
-    const payload={message,history};
+    if (Array.isArray(body.images)) {
+      payload.images = body.images
+        .filter(x => typeof x === 'string')
+        .slice(0, 3)
+        .filter(x => x.length <= 12_000_000);
+    }
     const headers={'Content-Type':'application/json','Accept':'application/json'};
+    // Si ton backend amont demande une clé, elle reste dans Vercel.
     if(process.env.DAVBOT_UPSTREAM_KEY) headers['Authorization']='Bearer '+process.env.DAVBOT_UPSTREAM_KEY;
     const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),55000);
     const upstream=await fetch(UPSTREAM,{method:'POST',headers,body:JSON.stringify(payload),signal:controller.signal});
@@ -106,8 +60,6 @@ module.exports=async(req,res)=>{
     res.status(upstream.status).setHeader('Content-Type',upstream.headers.get('content-type')||'application/json; charset=utf-8');
     return res.send(text);
   }catch(e){
-    return res.status(e.name==='AbortError'?504:500).json({
-      error:e.message || 'Erreur du serveur DAVBOT.'
-    });
+    return res.status(e.name==='AbortError'?504:500).json({error:e.name==='AbortError'?'Le serveur IA a mis trop de temps à répondre.':'Erreur du serveur DAVBOT.'});
   }
 };

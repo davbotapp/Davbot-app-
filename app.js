@@ -106,11 +106,10 @@ async function send(){
  const text=input.value.trim();
  if((!text && !attached) || $("#typing").classList.contains("busy"))return;
 
- input.value="";
- resizeInput();
-
  const file=attached;
  attached=null;
+ input.value="";
+ resizeInput();
  $("#attachPreview").classList.add("hidden");
 
  let imageData=null;
@@ -118,11 +117,18 @@ async function send(){
    imageData=await fileToDataURL(file);
  }
 
- const displayText=text || "Analyse cette image.";
- add("user",displayText,{
-   image:imageData||undefined,
-   fileName:file?.name||undefined
- });
+ // Image generation is handled by DAVBOT's deployed /api/image.
+ // It is NOT sent to the text model as a normal chat request.
+ const imageRequest=/\b(génère|genere|générer|generez|crée|cree|créer|creer|dessine|dessiner|produis|produire|fabrique|faire)\b[\s\S]{0,80}\b(image|photo|illustration|logo|affiche|poster|dessin|visuel)\b/i.test(text)
+   || /\b(image|photo|illustration|logo|affiche|poster|dessin|visuel)\b[\s\S]{0,80}\b(génère|genere|crée|cree|dessine|produis|fabrique)\b/i.test(text);
+
+ if(imageRequest && !imageData){
+   add("user",text);
+   await generateImage(text.replace(/^(génère|genere|générer|generez|crée|cree|créer|creer|dessine|dessiner|produis|produire|fabrique)\s*/i,"").trim() || text);
+   return;
+ }
+
+ add("user",text || "Analyse cette image.",{image:imageData||undefined,fileName:file?.name||undefined});
 
  $("#typing").classList.remove("hidden");
  $("#typing").classList.add("busy");
@@ -142,40 +148,41 @@ async function generateImage(prompt){
  const clean=String(prompt||"").trim();
  if(!clean)return;
 
- const c=current();
- if(!c)return;
-
- add("user","Génère cette image : "+clean);
  $("#typing").classList.remove("hidden");
  $("#typing").classList.add("busy");
 
  try{
    const r=await fetch("/api/image",{
      method:"POST",
-     headers:{"Content-Type":"application/json","Accept":"application/json, image/*"},
+     headers:{"Content-Type":"application/json","Accept":"application/json"},
      body:JSON.stringify({prompt:clean,model:"flux"})
    });
 
-   const type=r.headers.get("content-type")||"";
+   const raw=await r.text();
+   let data=null;
+   try{data=JSON.parse(raw)}catch{}
+
    if(!r.ok){
-     let e=await r.text();
-     try{e=JSON.parse(e).error||e}catch{}
-     throw new Error(e||"Erreur de génération");
+     throw new Error(data?.error||raw||"Erreur de génération");
    }
 
    let url="";
-   if(type.startsWith("image/")){
+   if(data){
+     url=data.image||data.url||data.imageUrl||data.image_url||data.output||data.result||"";
+   }else if(r.headers.get("content-type")?.startsWith("image/")){
      const blob=await r.blob();
      url=URL.createObjectURL(blob);
-   }else{
-     const d=await r.json();
-     url=d.url||d.imageUrl||d.image_url||d.image||d.output||d.result||"";
-     if(typeof url!=="string")throw new Error("Format image non reconnu");
-     if(/^[A-Za-z0-9+/=]{100,}$/.test(url))
-       url="data:image/png;base64,"+url;
    }
 
-   if(!url)throw new Error("Aucune image reçue de l'API DAVBOT.");
+   if(typeof url!=="string" || !url){
+     throw new Error("L'API DAVBOT n'a retourné aucune image.");
+   }
+
+   if(/^[A-Za-z0-9+/=]{100,}$/.test(url)){
+     url="data:image/png;base64,"+url;
+   }
+
+   // Persist the generated image in the same conversation.
    add("assistant","Voici l'image générée.",{generatedImage:url});
  }catch(e){
    add("assistant","Impossible de générer l'image : "+e.message);

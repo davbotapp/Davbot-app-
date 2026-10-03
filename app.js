@@ -119,8 +119,9 @@ async function send(){
 
  // Image generation is handled by DAVBOT's deployed /api/image.
  // It is NOT sent to the text model as a normal chat request.
- const imageRequest=/\b(génère|genere|générer|generez|crée|cree|créer|creer|dessine|dessiner|produis|produire|fabrique|faire)\b[\s\S]{0,80}\b(image|photo|illustration|logo|affiche|poster|dessin|visuel)\b/i.test(text)
-   || /\b(image|photo|illustration|logo|affiche|poster|dessin|visuel)\b[\s\S]{0,80}\b(génère|genere|crée|cree|dessine|produis|fabrique)\b/i.test(text);
+ const imageRequest = /(?:g[ée]n[èe]re(?:r|z)?|cr[ée]e(?:r|z)?|dessine(?:r)?|produi(?:s|re|sez)|fabrique(?:r)?|fais(?:[- ]moi)?|faire)\b[\s\S]{0,120}\b(?:une?\s+)?(?:image|photo|illustration|logo|affiche|poster|dessin|visuel|portrait)\b/i.test(text)
+   || /\b(?:image|photo|illustration|logo|affiche|poster|dessin|visuel|portrait)\b[\s\S]{0,120}\b(?:g[ée]n[èe]re|cr[ée]e|dessine|produi|fabrique|fais)/i.test(text)
+   || /^(?:image|photo|logo|illustration)\s*:/i.test(text);
 
  if(imageRequest && !imageData){
    add("user",text);
@@ -152,10 +153,10 @@ async function generateImage(prompt){
  $("#typing").classList.add("busy");
 
  try{
-   const r=await fetch("/api/image",{
+   const r=await fetch("https://davbot-api-xw6y.vercel.app/api/image",{
      method:"POST",
      headers:{"Content-Type":"application/json","Accept":"application/json"},
-     body:JSON.stringify({prompt:clean,model:"flux"})
+     body:JSON.stringify({prompt:clean,type:"normal",size:"1024x1024"})
    });
 
    const raw=await r.text();

@@ -38,17 +38,13 @@ module.exports=async(req,res)=>{
     if(!message) return res.status(400).json({error:'Message vide.'});
     if(message.length>16000) return res.status(413).json({error:'Message trop long.'});
     const payload={message,history:cleanHistory(body.history)};
-    // Optional image input: forwarded to the separately deployed DAVBOT API.
-    // The browser never receives or needs any upstream API key.
-    const image = body.image || body.imageUrl || body.image_url || body.imageData || body.imageBase64;
-    if (typeof image === 'string' && image.length <= 12_000_000) {
-      payload.image = image;
-    }
-    if (Array.isArray(body.images)) {
-      payload.images = body.images
-        .filter(x => typeof x === 'string')
-        .slice(0, 3)
-        .filter(x => x.length <= 12_000_000);
+    const image = body.image || body.imageUrl || body.image_url || body.imageData || body.imageBase64 || body.images;
+    if(image){
+      const rawImages = Array.isArray(image) ? image : [image];
+      if(rawImages.length > 3) return res.status(400).json({error:'Maximum : 3 images.'});
+      const total = rawImages.reduce((n,x)=>n + (typeof x==='string'?x.length:0),0);
+      if(total > 18_000_000) return res.status(413).json({error:'Images trop volumineuses.'});
+      payload.image = rawImages.length===1 ? rawImages[0] : rawImages;
     }
     const headers={'Content-Type':'application/json','Accept':'application/json'};
     // Si ton backend amont demande une clé, elle reste dans Vercel.

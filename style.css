@@ -13,7 +13,3 @@ button,input,textarea,select{font:inherit}.app{display:flex;height:100vh}
 .light{--bg:#f7f8fb;--panel:#fff;--panel2:#fff;--text:#111827;--muted:#657083;--border:#dfe3ea}.light .sidebar,.light .topbar{background:#fff}.light .bubble,.light .composer{background:#fff}.light .composer textarea{color:#111827}.light .side-action,.light .new-chat,.light .suggestions button{color:#111827}
 @keyframes up{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}@keyframes bounce{50%{transform:translateY(-4px);opacity:.5}}@keyframes pulse{50%{transform:scale(1.12)}}
 @media(max-width:700px){.sidebar{position:fixed;z-index:30;left:-290px;top:0;bottom:0;transition:.25s}.sidebar.active{left:0;box-shadow:10px 0 50px #0009}.mobile-menu{display:block}.topbar{padding:0 12px}.chat{padding:20px 10px 145px}.welcome{margin-top:8vh}.welcome h1{font-size:24px}.bubble-wrap{max-width:86%}.composer-area{left:0;padding:10px}.composer-note{font-size:9px}}
-
-
-/* Images dans le chat */
-.msg-image{margin:0 0 10px;max-width:min(420px,100%);border-radius:16px;overflow:hidden}.msg-image img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain;background:#111827}.attach-preview{display:flex;align-items:center;gap:10px}.attach-preview button{margin-left:auto;border:0;background:transparent;font-size:22px;cursor:pointer}

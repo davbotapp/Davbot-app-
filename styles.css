@@ -18,6 +18,7 @@ button,textarea{font:inherit}button{cursor:pointer;border:0}.hidden{display:none
 body.light{--bg:#f5f7fb;--panel:#fff;--panel2:#eef2f7;--border:#dce2ec;--text:#101522;--muted:#657086}body.light .sidebar{background:#fff}body.light .composer{background:rgba(255,255,255,.96)}body.light .msg.user .bubble{background:#eef2ff}
 @media(max-width:760px){.sidebar{position:fixed;left:-290px;top:0;bottom:0;transition:left .2s;box-shadow:var(--shadow)}.sidebar.open{left:0}.mobile-only{display:grid}.composer-wrap{left:0;padding:10px}.messages{padding:20px 10px 145px}.bubble{max-width:86%}.suggestions{grid-template-columns:1fr}.workspace{padding:35px 15px}}
 
-
-/* Images dans le chat */
-.msg-image{margin:0 0 10px;max-width:min(420px,100%);border-radius:16px;overflow:hidden}.msg-image img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain;background:#111827}.attach-preview{display:flex;align-items:center;gap:10px}.attach-preview button{margin-left:auto;border:0;background:transparent;font-size:22px;cursor:pointer}
+/* DAVBOT inline image messages */
+.message-image{margin-top:10px;max-width:min(520px,100%);}
+.message-image img{display:block;width:100%;max-width:520px;max-height:520px;object-fit:contain;border-radius:16px;background:#0b1020;}
+.generated-image .download-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;text-decoration:none;}

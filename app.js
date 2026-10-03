@@ -33,7 +33,7 @@ function renderHistory(){
 function render(){
  renderHistory();const m=$("#messages"),c=current();m.innerHTML="";
  if(!c){newChat();return}
- if(!c.messages.length){m.innerHTML=`<div class="welcome"><div class="welcome-logo">${icon("bot")}</div><h1>Bonjour 👋</h1><p>Je suis <b>DAVBOT AI</b>. Pose-moi une question, envoie une image, demande du code, un texte ou une analyse.</p><div class="suggestions">
+ if(!c.messages.length){m.innerHTML=`<div class="welcome"><div class="welcome-logo">${icon("bot")}</div><h1>Bonjour 👋</h1><p>Je suis <b>DAVBOT AI</b>. Pose-moi une question, demande du code, un texte ou une analyse.</p><div class="suggestions">
  <button class="suggestion">Crée-moi une application web moderne</button><button class="suggestion">Explique-moi JavaScript simplement</button><button class="suggestion">Écris une description professionnelle</button><button class="suggestion">Génère une idée de logo</button></div></div>`;
  $$(".suggestion").forEach(b=>b.onclick=()=>{setView("chat");$("#input").value=b.textContent;send()});return}
  c.messages.forEach((msg,i)=>addMessageDOM(msg,i));
@@ -42,84 +42,157 @@ function render(){
 function addMessageDOM(msg,i){
  const m=$("#messages"),row=document.createElement("div");
  row.className="msg "+(msg.role==="user"?"user":"assistant");
- const imageHtml=msg.image
-   ? `<div class="msg-image"><img src="${escapeHtml(msg.image)}" alt="Image jointe" loading="lazy"></div>`
+
+ const imageHtml = msg.image
+   ? `<div class="message-image"><img src="${escapeHtml(msg.image)}" alt="Image envoyée" loading="lazy"></div>`
    : "";
- row.innerHTML=`<div class="avatar">${icon(msg.role==="user"?"user":"bot")}</div><div>
-   ${imageHtml}
-   <div class="bubble">${escapeHtml(msg.content||"")}</div>
-   <div class="msg-actions"><button data-copy>${icon("copy")} Copier</button><button data-del>${icon("trash")} Supprimer</button>${msg.role==="assistant"?'<button data-speak>🔊 Lire</button>':""}</div>
- </div>`;
+ const generatedHtml = msg.generatedImage
+   ? `<div class="message-image generated-image"><img src="${escapeHtml(msg.generatedImage)}" alt="Image générée" loading="lazy">
+      <a class="download-btn" href="${escapeHtml(msg.generatedImage)}" download="davbot-image.png">${icon("download")} Télécharger</a></div>`
+   : "";
+
+ row.innerHTML=`<div class="avatar">${icon(msg.role==="user"?"user":"bot")}</div>
+ <div><div class="bubble">${escapeHtml(msg.content||"")}${imageHtml}${generatedHtml}</div>
+ <div class="msg-actions"><button data-copy>${icon("copy")} Copier</button>
+ <button data-del>${icon("trash")} Supprimer</button>
+ ${msg.role==="assistant"?'<button data-speak>🔊 Lire</button>':""}</div></div>`;
+
  row.querySelector("[data-copy]").onclick=()=>navigator.clipboard?.writeText(msg.content||"");
  row.querySelector("[data-del]").onclick=()=>{const c=current();c.messages.splice(i,1);save();render()};
  row.querySelector("[data-speak]")?.addEventListener("click",()=>speak(msg.content||""));
- m.appendChild(row);
+ m.appendChild(row)
 }
+
 function add(role,content,extra={}){
  const c=current();c.messages.push({role,content,...extra});
  if(role==="user"&&c.title==="Nouvelle discussion")c.title=content.slice(0,42);
  save();render()
 }
 function speak(t){if("speechSynthesis"in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="fr-FR";speechSynthesis.speak(u)}}
-async function postChat(message,image){
+async function postChat(message, imageData=null){
  const c=current();
- const history=c.messages.slice(-24).map(x=>({role:x.role,content:x.content||""}));
- const body={message,history};
- if(image) body.image=image;
- const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
- const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{data={text:raw}};
+ const history=c.messages.slice(-24).map(x=>({
+   role:x.role,
+   content:String(x.content||"").slice(0,8000)
+ }));
+
+ const payload={message,history};
+ if(imageData) payload.image=imageData;
+
+ const r=await fetch("/api/chat",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify(payload)
+ });
+
+ const raw=await r.text();
+ let data;
+ try{data=JSON.parse(raw)}catch{data={text:raw}};
  if(!r.ok)throw new Error(data.error||"Erreur serveur");
  return data.answer||data.message||data.response||data.text||data.result||"Réponse vide."
 }
-function readImage(file){
+
+async function fileToDataURL(file){
  return new Promise((resolve,reject)=>{
-   if(!file || !file.type.startsWith("image/")) return reject(new Error("Ce fichier n'est pas une image."));
    const reader=new FileReader();
-   reader.onerror=()=>reject(new Error("Impossible de lire l'image."));
-   reader.onload=()=>{
-     const img=new Image();
-     img.onload=()=>{
-       const max=1600, scale=Math.min(1,max/Math.max(img.width,img.height));
-       const canvas=document.createElement("canvas");
-       canvas.width=Math.max(1,Math.round(img.width*scale));
-       canvas.height=Math.max(1,Math.round(img.height*scale));
-       const ctx=canvas.getContext("2d");
-       ctx.drawImage(img,0,0,canvas.width,canvas.height);
-       resolve(canvas.toDataURL("image/jpeg",0.82));
-     };
-     img.onerror=()=>reject(new Error("Image invalide."));
-     img.src=reader.result;
-   };
+   reader.onload=()=>resolve(String(reader.result||""));
+   reader.onerror=reject;
    reader.readAsDataURL(file);
  });
 }
+
 async function send(){
- const input=$("#input"),text=input.value.trim();
- if((!text&&!attached)||$("#typing").classList.contains("busy"))return;
+ const input=$("#input");
+ const text=input.value.trim();
+ if((!text && !attached) || $("#typing").classList.contains("busy"))return;
+
+ input.value="";
+ resizeInput();
+
  const file=attached;
- input.value="";resizeInput();
+ attached=null;
+ $("#attachPreview").classList.add("hidden");
+
+ let imageData=null;
+ if(file && file.type.startsWith("image/")){
+   imageData=await fileToDataURL(file);
+ }
+
+ const displayText=text || "Analyse cette image.";
+ add("user",displayText,{
+   image:imageData||undefined,
+   fileName:file?.name||undefined
+ });
+
+ $("#typing").classList.remove("hidden");
+ $("#typing").classList.add("busy");
+
  try{
-   let image=null;
-   if(file && file.type.startsWith("image/")) image=await readImage(file);
-   const displayText=text || "Analyse cette image.";
-   add("user",displayText,{image:image||null});
-   attached=null;$("#attachPreview").classList.add("hidden");$("#attachPreview").innerHTML="";
-   $("#typing").classList.remove("hidden");$("#typing").classList.add("busy");
-   const answer=await postChat(text||"Analyse cette image et explique ce que tu vois.",image);
+   const answer=await postChat(text || "Analyse cette image et explique ce que tu vois.",imageData);
    add("assistant",answer);
  }catch(e){
    add("assistant","Erreur : "+e.message);
  }finally{
-   $("#typing").classList.add("hidden");$("#typing").classList.remove("busy");
+   $("#typing").classList.add("hidden");
+   $("#typing").classList.remove("busy");
  }
 }
 
+async function generateImage(prompt){
+ const clean=String(prompt||"").trim();
+ if(!clean)return;
+
+ const c=current();
+ if(!c)return;
+
+ add("user","Génère cette image : "+clean);
+ $("#typing").classList.remove("hidden");
+ $("#typing").classList.add("busy");
+
+ try{
+   const r=await fetch("/api/image",{
+     method:"POST",
+     headers:{"Content-Type":"application/json","Accept":"application/json, image/*"},
+     body:JSON.stringify({prompt:clean,model:"flux"})
+   });
+
+   const type=r.headers.get("content-type")||"";
+   if(!r.ok){
+     let e=await r.text();
+     try{e=JSON.parse(e).error||e}catch{}
+     throw new Error(e||"Erreur de génération");
+   }
+
+   let url="";
+   if(type.startsWith("image/")){
+     const blob=await r.blob();
+     url=URL.createObjectURL(blob);
+   }else{
+     const d=await r.json();
+     url=d.url||d.imageUrl||d.image_url||d.image||d.output||d.result||"";
+     if(typeof url!=="string")throw new Error("Format image non reconnu");
+     if(/^[A-Za-z0-9+/=]{100,}$/.test(url))
+       url="data:image/png;base64,"+url;
+   }
+
+   if(!url)throw new Error("Aucune image reçue de l'API DAVBOT.");
+   add("assistant","Voici l'image générée.",{generatedImage:url});
+ }catch(e){
+   add("assistant","Impossible de générer l'image : "+e.message);
+ }finally{
+   $("#typing").classList.add("hidden");
+   $("#typing").classList.remove("busy");
+ }
+}
+
+async function generateProject(){
+ const p=$("#projectPrompt").value.trim(),out=$("#projectResult");if(!p)return;
+ out.classList.remove("hidden");out.textContent="Génération en cours…";
+ try{out.textContent=await postChat("Crée un plan de projet web complet et concret pour : "+p)}catch(e){out.textContent="Erreur : "+e.message}
+}
 function setView(v){
- $$(".view").forEach(x=>x.classList.add("hidden"));
- $("#chatView").classList.remove("hidden");
- $$(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view==="chat"));
- $("#sidebar").classList.remove("open");
- render();
+ $$(".view").forEach(x=>x.classList.add("hidden"));$("#"+(v==="chat"?"chatView":v==="project"?"projectView":"imageView")).classList.remove("hidden");
+ $$(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===v));$("#sidebar").classList.remove("open");if(v==="chat")render()
 }
 function resizeInput(){const x=$("#input");x.style.height="auto";x.style.height=Math.min(x.scrollHeight,180)+"px"}
 async function startDictation(){
@@ -143,16 +216,14 @@ $("#attachBtn").onclick=()=>$("#fileInput").click();
 $("#fileInput").onchange=e=>{
  attached=e.target.files[0]||null;
  if(attached){
-   $("#attachPreview").innerHTML=attached.type.startsWith("image/")
-     ? `<span>📷 ${escapeHtml(attached.name)}</span><button type="button" id="removeAttach" aria-label="Retirer">×</button>`
-     : `<span>📎 ${escapeHtml(attached.name)}</span><button type="button" id="removeAttach" aria-label="Retirer">×</button>`;
+   $("#attachPreview").textContent="Fichier : "+attached.name;
    $("#attachPreview").classList.remove("hidden");
-   $("#removeAttach").onclick=()=>{attached=null;$("#attachPreview").classList.add("hidden");$("#attachPreview").innerHTML=""};
  }
  e.target.value="";
 };
 $("#input").addEventListener("input",resizeInput);$("#input").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
 $$(".nav-item").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+$("#imageBtn").onclick=()=>generateImage($("#imagePrompt").value);$("#projectBtn").onclick=generateProject;
 if(localStorage.getItem("davbot_theme")==="light")document.body.classList.add("light");
 ensure();
 })();

@@ -88,40 +88,10 @@
           <div class="composer-note">DAVBOT AI peut faire des erreurs. Vérifiez les informations importantes.</div>
         </div>
       </section>
-
-      <section id="projectView" class="view hidden">
-        <div class="workspace">
-          <div class="workspace-head">
-            <div class="big-icon"><svg viewBox="0 0 24 24"><path d="m9 7-4 5 4 5M15 7l4 5-4 5M13.5 4.5l-3 15"/></svg></div>
-            <h1>Créer un projet</h1>
-            <p>Décris ton application et DAVBOT prépare une base de projet exploitable.</p>
-          </div>
-          <textarea id="projectPrompt" class="large-input" placeholder="Exemple : crée une application de gestion d'une boutique avec connexion, produits et tableau de bord..."></textarea>
-          <button id="projectBtn" class="primary-btn" type="button">
-            <svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg> Générer le projet
-          </button>
-          <pre id="projectResult" class="code-result hidden"></pre>
-        </div>
-      </section>
-
-      <section id="imageView" class="view hidden">
-        <div class="workspace">
-          <div class="workspace-head">
-            <div class="big-icon"><svg viewBox="0 0 24 24"><path d="M4 4.5h16v15H4z"/><circle cx="9" cy="9" r="1.5"/><path d="m5 17 4.5-4.5 3 3 2.5-2.5 4 4"/></svg></div>
-            <h1>Créer une image / logo</h1>
-            <p>Décris précisément le visuel que tu veux générer.</p>
-          </div>
-          <textarea id="imagePrompt" class="large-input" placeholder="Exemple : logo DAVBOT AI moderne, premium, fond sombre, symbole IA, rendu propre..."></textarea>
-          <button id="imageBtn" class="primary-btn" type="button">
-            <svg viewBox="0 0 24 24"><path d="m12 3 2.1 5.3L19.5 10l-5.4 1.7L12 17l-2.1-5.3L4.5 10l5.4-1.7L12 3Z"/><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></svg> Générer
-          </button>
-          <div id="imageResult" class="image-result hidden"></div>
-        </div>
-      </section>
     </main>
   </div>
 
-  <input id="fileInput" type="file" hidden accept=".txt,.md,.json,.js,.html,.css,.csv,image/*">
+  <input id="fileInput" type="file" hidden accept="image/*,.txt,.md,.json,.js,.html,.css,.csv" capture="environment">
   <script src="/app.js" defer></script>
 </body>
 </html>

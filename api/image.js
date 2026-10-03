@@ -45,11 +45,7 @@ module.exports=async(req,res)=>{
     if(prompt.length>5000) return res.status(413).json({error:'Prompt trop long.'});
 
     // Only DAVBOT's deployed image API receives the generation request.
-    const body={
-      ...raw,
-      prompt,
-      model: raw.model || 'flux'
-    };
+    const body={...raw, prompt};
 
     // Never forward client-supplied secrets.
     delete body.apiKey;

@@ -37,7 +37,11 @@ module.exports=async(req,res)=>{
     const message=String(body.message||'').trim();
     if(!message) return res.status(400).json({error:'Message vide.'});
     if(message.length>16000) return res.status(413).json({error:'Message trop long.'});
+    const image = typeof body.image === 'string' && body.image.startsWith('data:image/')
+      ? body.image.slice(0, 900000)
+      : '';
     const payload={message,history:cleanHistory(body.history)};
+    if(image) payload.image=image;
     const headers={'Content-Type':'application/json','Accept':'application/json'};
     // Si ton backend amont demande une clé, elle reste dans Vercel.
     if(process.env.DAVBOT_UPSTREAM_KEY) headers['Authorization']='Bearer '+process.env.DAVBOT_UPSTREAM_KEY;

@@ -25,3 +25,12 @@ body.light{--bg:#f5f7fb;--panel:#fff;--panel2:#eef2f7;--border:#dce2ec;--text:#1
 .download-btn svg{width:16px;height:16px}
 @media(max-width:760px){.message-image{width:100%}.message-image img{max-height:62vh;border-radius:13px}.image-actions button,.download-btn{font-size:12px;padding:7px 10px}}
 
+
+/* DAVBOT — WhatsApp-style thinking indicator + stable image sizing */
+.typing{display:flex;align-items:center;gap:4px;width:max-content;margin:0 0 10px 48px;padding:9px 12px;border-radius:14px;background:var(--panel,#101727);border:1px solid var(--border,#273147);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.typing span{display:block;width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.35;animation:davbotTyping 1.05s infinite ease-in-out}
+.typing span:nth-child(2){animation-delay:.16s}.typing span:nth-child(3){animation-delay:.32s}
+@keyframes davbotTyping{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-5px);opacity:1}}
+.message-image{width:min(100%,760px);max-width:760px}
+.message-image img{display:block;width:auto;height:auto;max-width:100%;max-height:min(72vh,760px);object-fit:contain;object-position:center;border-radius:16px}
+@media(max-width:760px){.typing{margin-left:42px}.message-image{width:100%;max-width:100%}.message-image img{width:auto;max-width:100%;max-height:62vh}}
